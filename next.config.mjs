@@ -22,8 +22,8 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-  basePath: "https://github.com/nikhiljangid120/Code-Analyzer", // Set GitHub Pages subpath
-  assetPrefix: "https://github.com/nikhiljangid120/Code-Analyzer", // Ensure assets load correctly
+  basePath: "/Code-Analyzer", // Set GitHub Pages subpath
+  assetPrefix: "/Code-Analyzer", // Ensure assets load correctly
 }
 
 mergeConfig(nextConfig, userConfig)

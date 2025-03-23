@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import AlgorithmVisualizer from "@/components/algorithm-visualizer"
 import DataStructureVisualizer from "@/components/data-structure-visualizer"
 import { getAlgorithmExplanation, type AlgorithmExplanationResult } from "@/lib/gemini-service"
-import { RefreshCw, Play, Sparkles, Loader2, Info, BarChart2, Database } from "lucide-react"
+import { RefreshCw, Play, Sparkles, Loader2, Info, BarChart2, Database, Box } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -59,6 +59,17 @@ export default function AlgorithmVisualizerPage() {
   const [algorithmExplanation, setAlgorithmExplanation] = useState<AlgorithmExplanationResult | null>(null)
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false)
   const [is3D, setIs3D] = useState(false)
+  const [sortingIn3D, setSortingIn3D] = useState(false)
+  const [visualizerHeight, setVisualizerHeight] = useState(400)
+
+  // Adjust height based on 3D mode to ensure proper rendering
+  useEffect(() => {
+    if (is3D || sortingIn3D) {
+      setVisualizerHeight(500); // Increase height for 3D visualization
+    } else {
+      setVisualizerHeight(400);
+    }
+  }, [is3D, sortingIn3D]);
 
   const handleAlgorithmChange = (value: string) => {
     setAlgorithm(value)
@@ -183,25 +194,34 @@ export default function AlgorithmVisualizerPage() {
                     </CardTitle>
                     <CardDescription>Configure the algorithm and input data for visualization</CardDescription>
                   </div>
-                  <Button
-                    variant={showExplanation ? "default" : "outline"}
-                    size="sm"
-                    onClick={handleToggleExplanation}
-                    className="flex items-center gap-2"
-                    disabled={isLoadingExplanation}
-                  >
-                    {isLoadingExplanation ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      <>
-                        <Info className="h-4 w-4" />
-                        {showExplanation ? "Hide" : "Show"} Explanation
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center space-x-2">
+                      <Switch id="sorting-3d-mode" checked={sortingIn3D} onCheckedChange={setSortingIn3D} />
+                      <Label htmlFor="sorting-3d-mode" className="flex items-center gap-1">
+                        <Box className="h-4 w-4" />
+                        3D View
+                      </Label>
+                    </div>
+                    <Button
+                      variant={showExplanation ? "default" : "outline"}
+                      size="sm"
+                      onClick={handleToggleExplanation}
+                      className="flex items-center gap-2"
+                      disabled={isLoadingExplanation}
+                    >
+                      {isLoadingExplanation ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <Info className="h-4 w-4" />
+                          {showExplanation ? "Hide" : "Show"} Explanation
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -285,8 +305,9 @@ export default function AlgorithmVisualizerPage() {
                 algorithm={algorithm}
                 data={data}
                 width={showExplanation ? 500 : 800}
-                height={400}
+                height={visualizerHeight}
                 colorMode={colorMode}
+                is3D={sortingIn3D}
               />
             </motion.div>
 
@@ -399,11 +420,22 @@ export default function AlgorithmVisualizerPage() {
           >
             <Card className="border border-border/40 shadow-lg overflow-hidden glass-effect mb-6">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-primary" />
-                  Data Structure Visualization
-                </CardTitle>
-                <CardDescription>Explore and interact with different data structures</CardDescription>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="h-5 w-5 text-primary" />
+                      Data Structure Visualization
+                    </CardTitle>
+                    <CardDescription>Explore and interact with different data structures</CardDescription>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch id="3d-mode" checked={is3D} onCheckedChange={setIs3D} />
+                    <Label htmlFor="3d-mode" className="flex items-center gap-1">
+                      <Box className="h-4 w-4" />
+                      3D Visualization
+                    </Label>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -423,9 +455,28 @@ export default function AlgorithmVisualizerPage() {
                     </Select>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Switch id="3d-mode" checked={is3D} onCheckedChange={setIs3D} />
-                    <Label htmlFor="3d-mode">Enable 3D Visualization</Label>
+                  <div className="space-y-2">
+                    <Label>Visualization Options</Label>
+                    <Select value={colorMode} onValueChange={handleColorModeChange}>
+                      <SelectTrigger className="bg-background/60">
+                        <SelectValue placeholder="Color Theme" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {colorModeOptions.map((option) => (
+                          <SelectItem key={option.id} value={option.id}>
+                            {option.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Interactive Controls</Label>
+                    <Button onClick={handleRandomize} className="w-full">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Randomize Data
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -437,7 +488,13 @@ export default function AlgorithmVisualizerPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <DataStructureVisualizer is3D={is3D} />
+            <DataStructureVisualizer 
+              dataStructure={dataStructure} 
+              data={data}
+              is3D={is3D} 
+              colorMode={colorMode}
+              height={visualizerHeight}
+            />
           </motion.div>
         </TabsContent>
       </Tabs>
@@ -449,4 +506,3 @@ export default function AlgorithmVisualizerPage() {
 function generateRandomArray(size: number): number[] {
   return Array.from({ length: size }, () => Math.floor(Math.random() * 100) + 1)
 }
-

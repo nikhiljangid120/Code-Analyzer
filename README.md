@@ -39,5 +39,5 @@ A web-based tool that allows users to analyze code, visualize algorithm executio
 
 ## Environment Variables
 
-Create a `.env.local` file in the root directory with the following:
+Create a `.env.local` file in the root directory:
 

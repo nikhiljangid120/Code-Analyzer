@@ -23,7 +23,7 @@ A web-based tool that allows users to analyze code, visualize algorithm executio
 - Memory consumption analysis
 - Compare multiple algorithms side by side
 
-### User-Friendly UI
+### User-Friendly UI 
 - Modern, responsive design with dark/light mode toggle
 - Syntax highlighting code editor
 - Interactive visualizations

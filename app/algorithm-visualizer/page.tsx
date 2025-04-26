@@ -505,4 +505,4 @@ export default function AlgorithmVisualizerPage() {
 // Helper function to generate a random array
 function generateRandomArray(size: number): number[] {
   return Array.from({ length: size }, () => Math.floor(Math.random() * 100) + 1)
-}
+} 

@@ -19,6 +19,8 @@ export default function CodeAnalyzerPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<CodeAnalysisResult | null>(null)
   const [activeSnippetIndex, setActiveSnippetIndex] = useState(0)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
 
   const handleCodeChange = (value: string) => {
     setCode(value)
@@ -39,19 +41,40 @@ export default function CodeAnalyzerPage() {
     }
 
     setIsAnalyzing(true)
+    setAnalysisError(null)
+
     try {
-      const result = await analyzeCode(code, language)
+      // Set a timeout to handle potential API delays
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Analysis request timed out")), 30000) // 30 second timeout
+      })
+
+      // Race between the actual API call and the timeout
+      const result = (await Promise.race([analyzeCode(code, language), timeoutPromise])) as CodeAnalysisResult
+
       setAnalysisResult(result)
+      setRetryCount(0)
     } catch (error) {
       console.error("Error analyzing code:", error)
+
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
+      setAnalysisError(errorMessage)
+
       toast({
         title: "Analysis failed",
-        description: "There was an error analyzing your code. Please try again.",
+        description: errorMessage.includes("timed out")
+          ? "The analysis request timed out. Please try again or use a smaller code sample."
+          : "There was an error analyzing your code. Please try again.",
         variant: "destructive",
       })
     } finally {
       setIsAnalyzing(false)
     }
+  }
+
+  const handleRetry = () => {
+    setRetryCount((prev) => prev + 1)
+    handleAnalyzeCode()
   }
 
   const getScoreColor = (score: number) => {
@@ -146,6 +169,34 @@ export default function CodeAnalyzerPage() {
                       opportunities.
                     </p>
                   </CardContent>
+                </Card>
+              </motion.div>
+            ) : analysisError ? (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="border border-border/40 shadow-lg overflow-hidden glass-effect">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-red-500">Analysis Failed</CardTitle>
+                    <CardDescription>There was an error analyzing your code</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col items-center justify-center py-8 space-y-4">
+                    <AlertCircle className="h-16 w-16 text-red-500" />
+                    <p className="text-muted-foreground text-center max-w-md">
+                      {analysisError.includes("timed out")
+                        ? "The analysis request timed out. This can happen with large code samples or when the API is experiencing high traffic."
+                        : "There was an error processing your code. This might be due to API limitations or server issues."}
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={handleRetry} className="w-full">
+                      Retry Analysis ({retryCount})
+                    </Button>
+                  </CardFooter>
                 </Card>
               </motion.div>
             ) : analysisResult ? (
@@ -454,4 +505,3 @@ export default function CodeAnalyzerPage() {
     </div>
   )
 }
-

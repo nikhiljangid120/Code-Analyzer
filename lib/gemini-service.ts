@@ -1,5 +1,4 @@
 "use server"
-
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai"
 import { z } from "zod" // For input validation
 

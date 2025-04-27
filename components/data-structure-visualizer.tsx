@@ -4,12 +4,14 @@ import { useState, useEffect, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Trash, RefreshCw, Search } from "lucide-react"
+import { Plus, Trash, RefreshCw, Search, Info, Palette } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "@/components/ui/use-toast"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, Text, Box, Sphere, Line } from "@react-three/drei"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
 
 interface Node {
   id: string
@@ -58,8 +60,262 @@ type DataStructure = "array" | "tree" | "linkedList" | "graph" | "stack" | "queu
 interface DataStructureVisualizerProps {
   dataStructure: DataStructure
   is3D?: boolean
-  colorMode?: "default" | "rainbow" | "heat"
+  colorMode?: "default" | "rainbow" | "heat" | "pastel"
   height?: number
+}
+
+interface DataStructureInfo {
+  definition: string
+  why: string
+  when: string
+  advantages: string[]
+  disadvantages: string[]
+  timeComplexity: {
+    access: string
+    search: string
+    insert: string
+    delete: string
+  }
+  spaceComplexity: string
+  exampleProblems: string[]
+  realWorldApplications: string[]
+}
+
+const dataStructureInfo: Record<DataStructure, DataStructureInfo> = {
+  array: {
+    definition: "An array is a linear data structure that stores elements of the same type in contiguous memory locations, accessible via indices. Each element is identified by its index, starting from 0.",
+    why: "Arrays provide fast access to elements using indices and are memory-efficient due to their contiguous storage. They are simple to implement and ideal for scenarios requiring quick lookups.",
+    when: "Use arrays for fixed-size collections, random access, or when memory efficiency is critical, such as in image processing, simple lists, or lookup tables.",
+    advantages: [
+      "Constant-time O(1) access to elements via index",
+      "Memory efficient due to contiguous storage",
+      "Simple to implement and understand",
+      "Supports iteration and sorting efficiently"
+    ],
+    disadvantages: [
+      "Fixed size (in most languages), requiring resizing",
+      "Insertions and deletions are O(n) due to shifting",
+      "Not suitable for dynamic data"
+    ],
+    timeComplexity: {
+      access: "O(1)",
+      search: "O(n) (linear search), O(log n) (binary search if sorted)",
+      insert: "O(n) (at beginning/end), O(1) (at end with space)",
+      delete: "O(n) (at beginning/end), O(1) (at end)",
+    },
+    spaceComplexity: "O(n)",
+    exampleProblems: ["Two Sum", "Maximum Subarray", "Rotate Array", "Merge Intervals"],
+    realWorldApplications: [
+      "Storing pixel values in image processing",
+      "Implementing lookup tables",
+      "Managing simple lists like student scores",
+      "Caching frequently accessed data"
+    ]
+  },
+  tree: {
+    definition: "A tree is a hierarchical data structure with nodes connected by edges, where each node has at most two children in a binary tree. It consists of a root node and subtrees, often used to represent hierarchical relationships.",
+    why: "Trees efficiently represent hierarchical relationships and enable logarithmic-time operations for searching, insertion, and deletion in balanced cases. Binary Search Trees (BSTs) maintain sorted order for efficient lookups.",
+    when: "Use trees for hierarchical data (e.g., file systems), searching (e.g., BSTs), decision-making algorithms, or when implementing structures like heaps or tries.",
+    advantages: [
+      "Efficient logarithmic operations in balanced trees",
+      "Represents hierarchical relationships naturally",
+      "Flexible for various applications (e.g., BST, AVL, Red-Black)",
+      "Supports recursive algorithms"
+    ],
+    disadvantages: [
+      "Unbalanced trees can degrade to O(n) performance",
+      "Complex to implement and maintain balance",
+      "Higher memory overhead due to pointers"
+    ],
+    timeComplexity: {
+      access: "O(log n) (balanced), O(n) (unbalanced)",
+      search: "O(log n) (balanced), O(n) (unbalanced)",
+      insert: "O(log n) (balanced), O(n) (unbalanced)",
+      delete: "O(log n) (balanced), O(n) (unbalanced)",
+    },
+    spaceComplexity: "O(n)",
+    exampleProblems: ["Binary Tree Inorder Traversal", "Lowest Common Ancestor", "Validate Binary Search Tree", "Path Sum"],
+    realWorldApplications: [
+      "File system structures",
+      "Database indexing (B-trees)",
+      "Decision trees in machine learning",
+      "XML/HTML DOM parsing"
+    ]
+  },
+  linkedList: {
+    definition: "A linked list is a linear data structure where elements (nodes) are stored in non-contiguous memory, each containing a value and a pointer to the next node. Variants include singly, doubly, and circular linked lists.",
+    why: "Linked lists allow efficient insertion and deletion at the beginning or end and dynamic memory allocation, making them ideal for scenarios where size changes frequently.",
+    when: "Use linked lists for dynamic data, frequent insertions/deletions, or when implementing stacks, queues, or adjacency lists for graphs.",
+    advantages: [
+      "Dynamic size with efficient O(1) insertions/deletions at head",
+      "No need for contiguous memory",
+      "Flexible for implementing other data structures"
+    ],
+    disadvantages: [
+      "O(n) access and search due to sequential traversal",
+      "Extra memory for pointers",
+      "Not cache-friendly due to non-contiguous storage"
+    ],
+    timeComplexity: {
+      access: "O(n)",
+      search: "O(n)",
+      insert: "O(1) (at head/tail), O(n) (at position)",
+      delete: "O(1) (at head), O(n) (at position/tail)",
+    },
+    spaceComplexity: "O(n)",
+    exampleProblems: ["Reverse Linked List", "Merge Two Sorted Lists", "Cycle Detection", "Add Two Numbers"],
+    realWorldApplications: [
+      "Implementing undo functionality in editors",
+      "Task scheduling in operating systems",
+      "Adjacency lists in graph algorithms",
+      "Music playlist management"
+    ]
+  },
+  graph: {
+    definition: "A graph is a non-linear data structure consisting of nodes (vertices) connected by edges, representing relationships. It can be directed or undirected, weighted or unweighted, and represented using adjacency lists or matrices.",
+    why: "Graphs model complex relationships, such as networks, social connections, or paths, and support algorithms like shortest path, traversal, or cycle detection.",
+    when: "Use graphs for network analysis, pathfinding, social networks, dependency modeling, or recommendation systems.",
+    advantages: [
+      "Flexible for modeling complex relationships",
+      "Supports diverse algorithms (DFS, BFS, Dijkstra’s)",
+      "Adaptable to directed/undirected and weighted variants"
+    ],
+    disadvantages: [
+      "High memory usage for dense graphs (O(V²) in matrices)",
+      "Complex to implement and traverse",
+      "Edge operations can be costly in adjacency lists"
+    ],
+    timeComplexity: {
+      access: "O(1) (adjacency list/matrix)",
+      search: "O(V + E) (DFS/BFS)",
+      insert: "O(1) (edge in adjacency list), O(1) (matrix)",
+      delete: "O(E) (edge in adjacency list), O(1) (matrix)",
+    },
+    spaceComplexity: "O(V + E) (adjacency list), O(V²) (matrix)",
+    exampleProblems: ["Shortest Path (Dijkstra’s)", "Minimum Spanning Tree", "Topological Sort", "Course Schedule"],
+    realWorldApplications: [
+      "Social network analysis",
+      "GPS navigation and route planning",
+      "Dependency management in build systems",
+      "Recommendation systems"
+    ]
+  },
+  stack: {
+    definition: "A stack is a linear data structure that follows the Last-In-First-Out (LIFO) principle, with operations push (add) and pop (remove) performed at the top.",
+    why: "Stacks are ideal for tracking state, backtracking, or managing function calls due to their LIFO nature, making them essential for recursive algorithms and expression evaluation.",
+    when: "Use stacks for expression evaluation, undo mechanisms, backtracking algorithms, or managing function call stacks.",
+    advantages: [
+      "O(1) push and pop operations",
+      "Simple to implement",
+      "Ideal for LIFO-based problems"
+    ],
+    disadvantages: [
+      "O(n) access and search",
+      "Limited to LIFO access pattern",
+      "Not suitable for random access"
+    ],
+    timeComplexity: {
+      access: "O(n)",
+      search: "O(n)",
+      insert: "O(1) (push)",
+      delete: "O(1) (pop)",
+    },
+    spaceComplexity: "O(n)",
+    exampleProblems: ["Valid Parentheses", "Min Stack", "Evaluate Reverse Polish Notation", "Daily Temperatures"],
+    realWorldApplications: [
+      "Function call stack in programming",
+      "Undo functionality in software",
+      "Expression evaluation in compilers",
+      "Browser history navigation"
+    ]
+  },
+  queue: {
+    definition: "A queue is a linear data structure that follows the First-In-First-Out (FIFO) principle, with operations enqueue (add at back) and dequeue (remove from front). Variants include circular and priority queues.",
+    why: "Queues manage ordered processing, such as task scheduling or breadth-first search, due to their FIFO nature, ensuring fair processing of elements.",
+    when: "Use queues for task scheduling, BFS, buffering data streams, or managing asynchronous tasks.",
+    advantages: [
+      "O(1) enqueue and dequeue operations",
+      "Supports FIFO processing",
+      "Flexible for variants like priority queues"
+    ],
+    disadvantages: [
+      "O(n) access and search",
+      "Limited to FIFO access pattern",
+      "Not suitable for random access"
+    ],
+    timeComplexity: {
+      access: "O(n)",
+      search: "O(n)",
+      insert: "O(1) (enqueue)",
+      delete: "O(1) (dequeue)",
+    },
+    spaceComplexity: "O(n)",
+    exampleProblems: ["Sliding Window Maximum", "Implement Queue using Stacks", "Level Order Traversal", "Task Scheduler"],
+    realWorldApplications: [
+      "Task scheduling in operating systems",
+      "Print job management",
+      "Breadth-first search in graphs",
+      "Buffering in data streaming"
+    ]
+  },
+  heap: {
+    definition: "A heap is a tree-based data structure (usually a binary tree) that satisfies the heap property, where the parent node is greater (max-heap) or smaller (min-heap) than its children. It is commonly used for priority queues.",
+    why: "Heaps provide efficient access to the minimum/maximum element and are used in priority-based scheduling, sorting, or graph algorithms like Dijkstra’s.",
+    when: "Use heaps for priority queues, scheduling tasks, or algorithms requiring frequent min/max access, such as heap sort or shortest path.",
+    advantages: [
+      "O(1) access to min/max element",
+      "O(log n) insert and delete operations",
+      "Efficient for priority-based processing"
+    ],
+    disadvantages: [
+      "O(n) search for arbitrary elements",
+      "Not suitable for random access",
+      "Complex to implement compared to arrays"
+    ],
+    timeComplexity: {
+      access: "O(1) (root)",
+      search: "O(n)",
+      insert: "O(log n)",
+      delete: "O(log n)",
+    },
+    spaceComplexity: "O(n)",
+    exampleProblems: ["Kth Largest Element", "Merge K Sorted Lists", "Heap Sort", "Top K Frequent Elements"],
+    realWorldApplications: [
+      "Task scheduling with priorities",
+      "Event simulation systems",
+      "Dijkstra’s shortest path algorithm",
+      "Real-time analytics for top-k queries"
+    ]
+  },
+  hashTable: {
+    definition: "A hash table is a data structure that maps keys to values using a hash function for fast retrieval. It handles collisions using techniques like chaining or open addressing.",
+    why: "Hash tables offer average-case constant-time operations for lookup, insertion, and deletion, making them ideal for scenarios requiring fast data retrieval.",
+    when: "Use hash tables for fast data retrieval, caching, frequency counting, or implementing associative arrays and sets.",
+    advantages: [
+      "O(1) average-case operations",
+      "Efficient for key-value mappings",
+      "Flexible for various data types as keys"
+    ],
+    disadvantages: [
+      "O(n) worst-case operations due to collisions",
+      "Requires good hash function design",
+      "Higher memory usage due to load factor"
+    ],
+    timeComplexity: {
+      access: "O(1) average, O(n) worst",
+      search: "O(1) average, O(n) worst",
+      insert: "O(1) average, O(n) worst",
+      delete: "O(1) average, O(n) worst",
+    },
+    spaceComplexity: "O(n)",
+    exampleProblems: ["Two Sum", "Group Anagrams", "LRU Cache", "Contains Duplicate"],
+    realWorldApplications: [
+      "Database indexing and caching",
+      "Symbol tables in compilers",
+      "Session management in web applications",
+      "Deduplication in data processing"
+    ]
+  }
 }
 
 export default function DataStructureVisualizer({
@@ -128,6 +384,8 @@ export default function DataStructureVisualizer({
   const [activeOperation, setActiveOperation] = useState<"insert" | "delete" | "search" | null>(null)
   const [animationStep, setAnimationStep] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
+  const [currentColorMode, setCurrentColorMode] = useState(colorMode)
   const canvasContainerRef = useRef<HTMLDivElement>(null)
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
 
@@ -148,13 +406,17 @@ export default function DataStructureVisualizer({
   // Color logic based on colorMode
   const getNodeColor = (isHighlighted: boolean, index?: number, totalLength?: number) => {
     if (isHighlighted) return "#22c55e" // Vibrant green for highlights
-    if (colorMode === "rainbow" && index !== undefined && totalLength !== undefined) {
+    if (currentColorMode === "rainbow" && index !== undefined && totalLength !== undefined) {
       const hue = (index * 360 / totalLength) % 360
       return `hsl(${hue}, 80%, 60%)`
     }
-    if (colorMode === "heat" && index !== undefined && totalLength !== undefined) {
+    if (currentColorMode === "heat" && index !== undefined && totalLength !== undefined) {
       const intensity = index / totalLength
       return `hsl(20, 100%, ${50 + intensity * 30}%)`
+    }
+    if (currentColorMode === "pastel" && index !== undefined && totalLength !== undefined) {
+      const hue = (index * 360 / totalLength) % 360
+      return `hsl(${hue}, 50%, 80%)`
     }
     return {
       array: "linear-gradient(135deg, #f97316, #fb923c)", // Orange gradient
@@ -254,7 +516,11 @@ export default function DataStructureVisualizer({
           id: (graphData.length + 1).toString(),
           value,
           edges: [],
-          position: [(Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4],
+          position: [
+            (Math.random() - 0.5) * 4,
+            (Math.random() - 0.5) * 4,
+            (Math.random() - 0.5) * 4,
+          ],
         }
         setGraphData([...graphData, newGraphNode])
         break
@@ -702,19 +968,29 @@ export default function DataStructureVisualizer({
                   exit={{ opacity: 0, scale: 0.8, y: -20 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
-                  <div
-                    className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm md:text-base ${
-                      activeOperation === "insert" && index === arrayData.length - 1 && animationStep > 0
-                        ? "animate-pulse border-2 border-green-400"
-                        : activeOperation === "delete" && index === arrayData.length - 1 && animationStep > 0
-                        ? "animate-pulse border-2 border-red-400"
-                        : "border-2 border-gray-200/50"
-                    }`}
-                    style={{ background: getNodeColor(searchResult.found && searchResult.index === index, index, arrayData.length) }}
-                  >
-                    {value}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-300 mt-1 sm:mt-2">{index}</div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={cn(
+                            "w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm md:text-base",
+                            activeOperation === "insert" && index === arrayData.length - 1 && animationStep > 0
+                              ? "animate-pulse border-2 border-green-400"
+                              : activeOperation === "delete" && index === arrayData.length - 1 && animationStep > 0
+                              ? "animate-pulse border-2 border-red-400"
+                              : "border-2 border-gray-200/50"
+                          )}
+                          style={{ background: getNodeColor(searchResult.found && searchResult.index === index, index, arrayData.length) }}
+                        >
+                          {value}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Value: {value}, Index: {index}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <div className="text-xs sm:text-sm text-gray-300 mt-1 sm:mt-2">[{index}]</div>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -742,18 +1018,28 @@ export default function DataStructureVisualizer({
                     exit={{ opacity: 0, x: 30 }}
                     transition={{ duration: 0.4, ease: "easeOut", delay: index * 0.1 }}
                   >
-                    <div
-                      className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm md:text-base ${
-                        activeOperation === "insert" && index === linkedListData.length - 1 && animationStep > 0
-                          ? "animate-pulse border-2 border-green-400"
-                          : activeOperation === "delete" && index === linkedListData.length - 1 && animationStep > 0
-                          ? "animate-pulse border-2 border-red-400"
-                          : "border-2 border-gray-200/50"
-                      }`}
-                      style={{ background: getNodeColor(searchResult.found && searchResult.id === node.id, index, linkedListData.length) }}
-                    >
-                      {node.value}
-                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={cn(
+                              "w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm md:text-base",
+                              activeOperation === "insert" && index === linkedListData.length - 1 && animationStep > 0
+                                ? "animate-pulse border-2 border-green-400"
+                                : activeOperation === "delete" && index === linkedListData.length - 1 && animationStep > 0
+                                ? "animate-pulse border-2 border-red-400"
+                                : "border-2 border-gray-200/50"
+                            )}
+                            style={{ background: getNodeColor(searchResult.found && searchResult.id === node.id, index, linkedListData.length) }}
+                          >
+                            {node.value}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Value: {node.value}, ID: {node.id}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     {node.next && (
                       <motion.div
                         className="w-6 sm:w-8 md:w-10 flex items-center justify-center"
@@ -796,20 +1082,31 @@ export default function DataStructureVisualizer({
               {stackData.map((node, index) => (
                 <motion.div
                   key={node.id}
-                  className={`w-24 sm:w-28 md:w-32 h-12 sm:h-14 md:h-16 rounded-lg flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm md:text-base ${
+                  className={cn(
+                    "w-24 sm:w-28 md:w-32 h-12 sm:h-14 md:h-16 rounded-lg flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm md:text-base",
                     activeOperation === "insert" && index === stackData.length - 1 && animationStep > 0
                       ? "animate-pulse border-2 border-green-400"
                       : activeOperation === "delete" && index === stackData.length - 1 && animationStep > 0
                       ? "animate-pulse border-2 border-red-400"
-                      : "border-2 border-gray-200/50"
-                  } ${index === stackData.length - 1 ? "rounded-t-lg" : ""}`}
+                      : "border-2 border-gray-200/50",
+                    index === stackData.length - 1 ? "rounded-t-lg" : ""
+                  )}
                   style={{ background: getNodeColor(searchResult.found && searchResult.id === node.id, index, stackData.length) }}
                   initial={{ opacity: 0, y: -30 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -30 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
-                  {node.value}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>{node.value}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Value: {node.value}, Top: {index === stackData.length - 1 ? "Yes" : "No"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -828,20 +1125,31 @@ export default function DataStructureVisualizer({
                 {queueData.map((node, index) => (
                   <motion.div
                     key={node.id}
-                    className={`w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-lg flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm md:text-base ${
+                    className={cn(
+                      "w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-lg flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm md:text-base",
                       activeOperation === "insert" && index === queueData.length - 1 && animationStep > 0
                         ? "animate-pulse border-2 border-green-400"
                         : activeOperation === "delete" && index === 0 && animationStep > 0
                         ? "animate-pulse border-2 border-red-400"
-                        : "border-t-2 border-b-2 border-gray-200/50"
-                    } ${index === queueData.length - 1 ? "border-r-2 rounded-r-lg" : ""}`}
+                        : "border-t-2 border-b-2 border-gray-200/50",
+                      index === queueData.length - 1 ? "border-r-2 rounded-r-lg" : ""
+                    )}
                     style={{ background: getNodeColor(searchResult.found && searchResult.id === node.id, index, queueData.length) }}
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 30 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    {node.value}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>{node.value}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Value: {node.value}, Position: {index === 0 ? "Front" : index === queueData.length - 1 ? "Back" : "Middle"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -880,22 +1188,32 @@ export default function DataStructureVisualizer({
                           exit={{ opacity: 0, y: -20 }}
                           transition={{ duration: 0.4, ease: "easeOut" }}
                         >
-                          <div
-                            className={`w-16 sm:w-20 md:w-24 h-12 sm:h-14 md:h-16 rounded-xl flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm ${
-                              activeOperation === "insert" &&
-                              hashTableData[hashTableData.length - 1]?.key === entry.key &&
-                              animationStep > 0
-                                ? "animate-pulse border-2 border-green-400"
-                                : activeOperation === "delete" &&
-                                  hashTableData[hashTableData.length - 1]?.key === entry.key &&
-                                  animationStep > 0
-                                ? "animate-pulse border-2 border-red-400"
-                                : "border-2 border-gray-200/50"
-                            }`}
-                            style={{ background: getNodeColor(searchResult.found && searchResult.id === entry.key, index, hashTableData.length) }}
-                          >
-                            {entry.key}: {entry.value}
-                          </div>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div
+                                  className={cn(
+                                    "w-16 sm:w-20 md:w-24 h-12 sm:h-14 md:h-16 rounded-xl flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-xs sm:text-sm",
+                                    activeOperation === "insert" &&
+                                      hashTableData[hashTableData.length - 1]?.key === entry.key &&
+                                      animationStep > 0
+                                      ? "animate-pulse border-2 border-green-400"
+                                      : activeOperation === "delete" &&
+                                        hashTableData[hashTableData.length - 1]?.key === entry.key &&
+                                        animationStep > 0
+                                      ? "animate-pulse border-2 border-red-400"
+                                      : "border-2 border-gray-200/50"
+                                  )}
+                                  style={{ background: getNodeColor(searchResult.found && searchResult.id === entry.key, index, hashTableData.length) }}
+                                >
+                                  {entry.key}: {entry.value}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Key: {entry.key}, Value: {entry.value}, Index: {entry.index}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </motion.div>
                       ))}
                   </AnimatePresence>
@@ -1269,26 +1587,37 @@ export default function DataStructureVisualizer({
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        <circle
-          cx={x}
-          cy={y}
-          r={nodeRadius}
-          fill={getNodeColor(searchResult.found && searchResult.id === node.id, undefined, treeData.length)}
-          stroke="rgba(255, 255, 255, 0.3)"
-          strokeWidth="2"
-          className="shadow-lg hover:shadow-xl transition-all duration-300"
-        />
-        <text
-          x={x}
-          y={y}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="white"
-          fontSize={canvasSize.width < 640 ? "12" : "14"}
-          className="font-semibold"
-        >
-          {node.value}
-        </text>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <g>
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={nodeRadius}
+                  fill={getNodeColor(searchResult.found && searchResult.id === node.id, undefined, treeData.length)}
+                  stroke="rgba(255, 255, 255, 0.3)"
+                  strokeWidth="2"
+                  className="shadow-lg hover:shadow-xl transition-all duration-300"
+                />
+                <text
+                  x={x}
+                  y={y}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="white"
+                  fontSize={canvasSize.width < 640 ? "12" : "14"}
+                  className="font-semibold"
+                >
+                  {node.value}
+                </text>
+              </g>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Value: {node.value}, ID: {node.id}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </motion.g>,
     )
     if (node.left) {
@@ -1306,95 +1635,167 @@ export default function DataStructureVisualizer({
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-        />,
-      )
-      elements.push(...renderTreeNodes(nodes, node.left, leftX, leftY, width / 2))
-    }
-    if (node.right) {
-      const rightX = x + width / 2
-      const rightY = y + 80
-      elements.push(
-        <motion.line
-          key={`${node.id}-${node.right}`}
-          x1={x}
-          y1={y + nodeRadius}
-          x2={rightX}
-          y2={rightY - nodeRadius}
-          stroke="rgba(255, 255, 255, 0.3)"
-          strokeWidth="2"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        />,
-      )
-      elements.push(...renderTreeNodes(nodes, node.right, rightX, rightY, width / 2))
-    }
-    return elements
-  }
-
-  const renderGraphNodes = () => {
-    const centerX = 300
-    const centerY = 200
-    const radius = canvasSize.width < 640 ? 100 : 150
-    const nodeRadius = canvasSize.width < 640 ? 20 : 25
-    return graphData.map((node, index) => {
-      const angle = (index / graphData.length) * 2 * Math.PI
-      const x = centerX + radius * Math.cos(angle)
-      const y = centerY + radius * Math.sin(angle)
-      return (
-        <motion.g
-          key={node.id}
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-        >
-          <circle
-            cx={x}
-            cy={y}
-            r={nodeRadius}
-            fill={getNodeColor(searchResult.found && searchResult.id === node.id, index, graphData.length)}
+          />,
+        )
+        elements.push(...renderTreeNodes(nodes, node.left, leftX, leftY, width / 2))
+      }
+      if (node.right) {
+        const rightX = x + width / 2
+        const rightY = y + 80
+        elements.push(
+          <motion.line
+            key={`${node.id}-${node.right}`}
+            x1={x}
+            y1={y + nodeRadius}
+            x2={rightX}
+            y2={rightY - nodeRadius}
             stroke="rgba(255, 255, 255, 0.3)"
             strokeWidth="2"
-            className="shadow-lg hover:shadow-xl transition-all duration-300"
-          />
-          <text
-            x={x}
-            y={y}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="white"
-            fontSize={canvasSize.width < 640 ? "12" : "14"}
-            className="font-semibold"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />,
+        )
+        elements.push(...renderTreeNodes(nodes, node.right, rightX, rightY, width / 2))
+      }
+      return elements
+    }
+  
+    const renderGraphNodes = () => {
+      const nodes = graphData.map((node, index) => {
+        const x = ((node.position?.[0] || 0) + 5) * 60
+        const y = ((node.position?.[1] || 0) + 3) * 60
+        return (
+          <motion.g
+            key={node.id}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
-            {node.value}
-          </text>
-        </motion.g>
-      )
-    })
-  }
-
-  const renderGraphEdges = () => {
-    const centerX = 300
-    const centerY = 200
-    const radius = canvasSize.width < 640 ? 100 : 150
-    const edges: JSX.Element[] = []
-    graphData.forEach((node, sourceIndex) => {
-      const sourceAngle = (sourceIndex / graphData.length) * 2 * Math.PI
-      const sourceX = centerX + radius * Math.cos(sourceAngle)
-      const sourceY = centerY + radius * Math.sin(sourceAngle)
-      node.edges.forEach((targetId) => {
-        const targetIndex = graphData.findIndex((n) => n.id === targetId)
-        if (targetIndex > sourceIndex) {
-          const targetAngle = (targetIndex / graphData.length) * 2 * Math.PI
-          const targetX = centerX + radius * Math.cos(targetAngle)
-          const targetY = centerY + radius * Math.sin(targetAngle)
-          edges.push(
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <g>
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={canvasSize.width < 640 ? 20 : 25}
+                      fill={getNodeColor(searchResult.found && searchResult.id === node.id, index, graphData.length)}
+                      stroke="rgba(255, 255, 255, 0.3)"
+                      strokeWidth="2"
+                      className="shadow-lg hover:shadow-xl transition-all duration-300"
+                    />
+                    <text
+                      x={x}
+                      y={y}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="white"
+                      fontSize={canvasSize.width < 640 ? "12" : "14"}
+                      className="font-semibold"
+                    >
+                      {node.value}
+                    </text>
+                  </g>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Value: {node.value}, ID: {node.id}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </motion.g>
+        )
+      })
+      return nodes
+    }
+  
+    const renderGraphEdges = () => {
+      const edges: JSX.Element[] = []
+      graphData.forEach((node) => {
+        node.edges.forEach((targetId) => {
+          const targetNode = graphData.find((n) => n.id === targetId)
+          if (targetNode && node.id < targetId) {
+            const x1 = ((node.position?.[0] || 0) + 5) * 60
+            const y1 = ((node.position?.[1] || 0) + 3) * 60
+            const x2 = ((targetNode.position?.[0] || 0) + 5) * 60
+            const y2 = ((targetNode.position?.[1] || 0) + 3) * 60
+            edges.push(
+              <motion.line
+                key={`${node.id}-${targetId}`}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke="rgba(255, 255, 255, 0.3)"
+                strokeWidth="2"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              />,
+            )
+          }
+        })
+      })
+      return edges
+    }
+  
+    const renderHeapNodes = (nodes: HeapNode[]) => {
+      const elements: JSX.Element[] = []
+      nodes.forEach((node, index) => {
+        const x = (node.position?.[0] || 0) * 100 + 400
+        const y = (node.position?.[1] || 0) * -80 + 300
+        elements.push(
+          <motion.g
+            key={node.id}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          >
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <g>
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={canvasSize.width < 640 ? 20 : 25}
+                      fill={getNodeColor(searchResult.found && searchResult.id === node.id, index, nodes.length)}
+                      stroke="rgba(255, 255, 255, 0.3)"
+                      strokeWidth="2"
+                      className="shadow-lg hover:shadow-xl transition-all duration-300"
+                    />
+                    <text
+                      x={x}
+                      y={y}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="white"
+                      fontSize={canvasSize.width < 640 ? "12" : "14"}
+                      className="font-semibold"
+                    >
+                      {node.value}
+                    </text>
+                  </g>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Value: {node.value}, ID: {node.id}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </motion.g>,
+        )
+        const parentIndex = Math.floor((index - 1) / 2)
+        if (index > 0) {
+          const parent = nodes[parentIndex]
+          const parentX = (parent.position?.[0] || 0) * 100 + 400
+          const parentY = (parent.position?.[1] || 0) * -80 + 300
+          elements.push(
             <motion.line
-              key={`${node.id}-${targetId}`}
-              x1={sourceX}
-              y1={sourceY}
-              x2={targetX}
-              y2={targetY}
+              key={`${node.id}-parent`}
+              x1={x}
+              y1={y}
+              x2={parentX}
+              y2={parentY}
               stroke="rgba(255, 255, 255, 0.3)"
               strokeWidth="2"
               initial={{ pathLength: 0 }}
@@ -1404,210 +1805,290 @@ export default function DataStructureVisualizer({
           )
         }
       })
-    })
-    return edges
-  }
-
-  const renderHeapNodes = (heapData: HeapNode[]) => {
-    const nodeRadius = canvasSize.width < 640 ? 20 : 25
-    return heapData.map((node, index) => (
-      <motion.g
-        key={node.id}
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <circle
-          cx={node.position ? node.position[0] * (canvasSize.width < 640 ? 60 : 80) + 400 : 400}
-          cy={node.position ? node.position[1] * (canvasSize.width < 640 ? 60 : 80) + 200 : 200}
-          r={nodeRadius}
-          fill={getNodeColor(searchResult.found && searchResult.id === node.id, index, heapData.length)}
-          stroke="rgba(255, 255, 255, 0.3)"
-          strokeWidth="2"
-          className="shadow-lg hover:shadow-xl transition-all duration-300"
-        />
-        <text
-          x={node.position ? node.position[0] * (canvasSize.width < 640 ? 60 : 80) + 400 : 400}
-          y={node.position ? node.position[1] * (canvasSize.width < 640 ? 60 : 80) + 200 : 200}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="white"
-          fontSize={canvasSize.width < 640 ? "12" : "14"}
-          className="font-semibold"
+      return elements
+    }
+  
+    const handleColorModeChange = (mode: "default" | "rainbow" | "heat" | "pastel") => {
+      setCurrentColorMode(mode)
+    }
+  
+    const renderDetails = () => {
+      const info = dataStructureInfo[dataStructure]
+      return (
+        <div className="mt-4 p-4 sm:p-6 bg-gray-800/50 rounded-xl shadow-lg">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 capitalize">{dataStructure} Details</h2>
+          <Tabs defaultValue="overview" className="w-full">
+      <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-gray-800 p-2 rounded-lg w-full overflow-x-auto">
+        <TabsTrigger
+          value="overview"
+          className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
         >
-          {node.value}
-        </text>
-      </motion.g>
-    ))
-  }
+          Overview
+        </TabsTrigger>
+        <TabsTrigger
+          value="complexity"
+          className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
+        >
+          Complexity
+        </TabsTrigger>
+        <TabsTrigger
+          value="pros-cons"
+          className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
+        >
+          Pros & Cons
+        </TabsTrigger>
+        <TabsTrigger
+          value="applications"
+          className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
+        >
+          Applications
+        </TabsTrigger>
+      </TabsList>
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-2 sm:p-4 md:p-6">
-      <Card className="w-full max-w-full sm:max-w-4xl lg:max-w-5xl bg-gray-800/80 backdrop-blur-md shadow-2xl border border-gray-700/50">
-        <CardContent className="p-2 sm:p-4 md:p-6">
-          <div className="flex flex-col items-center justify-between space-y-4">
-            {/* Visualization Area */}
-            <motion.div
-              className="w-full"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            >
-              {renderDataStructure()}
-            </motion.div>
-
-            {/* Controls */}
-            <motion.div
-              className="w-full flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-            >
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <Input
-                  type="text"
-                  placeholder="Enter value"
-                  value={newValue}
-                  onChange={(e) => setNewValue(e.target.value)}
-                  className="w-full sm:w-32 bg-gray-700/50 text-white border-gray-600/50 focus:ring-2 focus:ring-blue-500 rounded-xl transition-all duration-300 placeholder-gray-400"
-                />
-                {dataStructure === "hashTable" && (
-                  <Input
-                    type="text"
-                    placeholder="Enter key"
-                    value={newKey}
-                    onChange={(e) => setNewKey(e.target.value)}
-                    className="w-full sm:w-32 bg-gray-700/50 text-white border-gray-600/50 focus:ring-2 focus:ring-blue-500 rounded-xl transition-all duration-300 placeholder-gray-400"
-                  />
-                )}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          onClick={handleAddValue}
-                          disabled={isAnimating}
-                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Add
-                        </Button>
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-gray-900 text-white border-gray-700">
-                      Add a new value to the {dataStructure}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <Input
-                  type="text"
-                  placeholder="Search value"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  className="w-full sm:w-32 bg-gray-700/50 text-white border-gray-600/50 focus:ring-2 focus:ring-blue-500 rounded-xl transition-all duration-300 placeholder-gray-400"
-                />
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          onClick={handleSearch}
-                          disabled={isAnimating}
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2"
-                        >
-                          <Search className="w-4 h-4" />
-                          Search
-                        </Button>
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-gray-900 text-white border-gray-700">
-                      Search for a value in the {dataStructure}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          onClick={handleDeleteValue}
-                          disabled={isAnimating}
-                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2"
-                        >
-                          <Trash className="w-4 h-4" />
-                          Delete
-                        </Button>
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-gray-900 text-white border-gray-700">
-                      Remove the last value from the {dataStructure}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          onClick={handleReset}
-                          disabled={isAnimating}
-                          className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2"
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                          Reset
-                        </Button>
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent classLKlassName="bg-gray-900 text-white border-gray-700">
-                      Reset the {dataStructure} to its initial state
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          onClick={handleRandomize}
-                          disabled={isAnimating}
-                          className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2"
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                          Randomize
-                        </Button>
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-gray-900 text-white border-gray-700">
-                      Randomize the values in the {dataStructure}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </motion.div>
+      <TabsContent value="overview" className="mt-4">
+        <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-white">Definition</h3>
+            <p className="text-gray-300 text-sm sm:text-base">{info.definition}</p>
           </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-white">Why Use It?</h3>
+            <p className="text-gray-300 text-sm sm:text-base">{info.why}</p>
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-white">When to Use?</h3>
+            <p className="text-gray-300 text-sm sm:text-base">{info.when}</p>
+          </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="complexity" className="mt-4">
+        <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-white">Time Complexity</h3>
+            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+              <li>Access: {info.timeComplexity.access}</li>
+              <li>Search: {info.timeComplexity.search}</li>
+              <li>Insert: {info.timeComplexity.insert}</li>
+              <li>Delete: {info.timeComplexity.delete}</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-white">Space Complexity</h3>
+            <p className="text-gray-300 text-sm sm:text-base">{info.spaceComplexity}</p>
+          </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="pros-cons" className="mt-4">
+        <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-white">Advantages</h3>
+            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+              {info.advantages.map((advantage, index) => (
+                <li key={index}>{advantage}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-white">Disadvantages</h3>
+            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+              {info.disadvantages.map((disadvantage, index) => (
+                <li key={index}>{disadvantage}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="applications" className="mt-4">
+        <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-white">Example Problems</h3>
+            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+              {info.exampleProblems.map((problem, index) => (
+                <li key={index}>{problem}</li>
+              ))}
+              {/* Note: "prescription drug names" seems like a stray text in the original; removed unless it's intentional */}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-white">Real-World Applications</h3>
+            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+              {info.realWorldApplications.map((application, index) => (
+                <li key={index}>{application}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </TabsContent>
+    </Tabs>
+        </div>
+      )
+    }
+  
+    return (
+      <Card className="w-full bg-gray-900/50 border-gray-800 shadow-xl">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-white capitalize">{dataStructure} Visualizer</h2>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setShowDetails(!showDetails)}
+                      className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+                    >
+                      <Info className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{showDetails ? "Hide" : "Show"} Details</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleReset}
+                      className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+                      disabled={isAnimating}
+                    >
+                      <RefreshCw className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Reset Data</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleRandomize}
+                      className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+                      disabled={isAnimating}
+                    >
+                      <svg
+                        className="h-4 w-4 sm:h-5 sm:w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Randomize Data</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() =>
+                        handleColorModeChange(
+                          currentColorMode === "default"
+                            ? "rainbow"
+                            : currentColorMode === "rainbow"
+                            ? "heat"
+                            : currentColorMode === "heat"
+                            ? "pastel"
+                            : "default",
+                        )
+                      }
+                      className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+                    >
+                      <Palette className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Change Color Mode: {currentColorMode}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="flex flex-1 gap-2 sm:gap-3">
+              {dataStructure === "hashTable" && (
+                <Input
+                  type="text"
+                  placeholder="Key"
+                  value={newKey}
+                  onChange={(e) => setNewKey(e.target.value)}
+                  className="bg-gray-800 text-white border-gray-600 focus:border-blue-500 w-24 sm:w-32"
+                  disabled={isAnimating}
+                />
+              )}
+              <Input
+                type="number"
+                placeholder="Value"
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+                className="bg-gray-800 text-white border-gray-600 focus:border-blue-500 w-24 sm:w-32"
+                disabled={isAnimating}
+              />
+              <Button
+                onClick={handleAddValue}
+                className="bg-green-600 hover:bg-green-700 text-white"
+                disabled={isAnimating}
+              >
+                <Plus className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Add
+              </Button>
+              <Button
+                onClick={handleDeleteValue}
+                className="bg-red-600 hover:bg-red-700 text-white"
+                disabled={isAnimating}
+              >
+                <Trash className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Delete
+              </Button>
+            </div>
+            <div className="flex gap-2 sm:gap-3">
+              <Input
+                type="number"
+                placeholder="Search value"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="bg-gray-800 text-white border-gray-600 focus:border-blue-500 w-24 sm:w-32"
+                disabled={isAnimating}
+              />
+              <Button
+                onClick={handleSearch}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isAnimating}
+              >
+                <Search className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Search
+              </Button>
+            </div>
+          </div>
+          <div
+            className="relative rounded-lg overflow-hidden shadow-lg"
+            style={{ height: `${height}px`, minHeight: "300px" }}
+          >
+            {renderDataStructure()}
+          </div>
+          {showDetails && renderDetails()}
         </CardContent>
       </Card>
-    </div>
-  )
-}
+    )
+  }

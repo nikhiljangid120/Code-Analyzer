@@ -17,7 +17,7 @@ A web-based tool that allows users to analyze code, visualize algorithm executio
 - Dynamic step control (play, pause, speed adjust)
 - Educational explanations of algorithm behavior and complexity
 
-### Performance Metrics
+### Performance Metrics 
 - Benchmark execution times with different input sizes
 - Graphs showing runtime comparisons
 - Memory consumption analysis

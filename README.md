@@ -3,7 +3,7 @@
 A web-based tool that allows users to analyze code, visualize algorithm execution, and get AI-powered insights. The platform supports multiple programming languages, provides real-time complexity analysis, suggests optimizations, and offers interactive visualizations of data structures and algorithms.    
 
 ## Features   
-   
+    
 ### Code Analyzer 
 - Input code in multiple languages (JavaScript, TypeScript, Python, Java, C++)
 - AI-powered analysis using Gemini API  

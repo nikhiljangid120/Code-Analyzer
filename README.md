@@ -15,7 +15,7 @@ A web-based tool that allows users to analyze code, visualize algorithm executio
 - Step-by-step execution of sorting algorithms (Bubble Sort, Quick Sort, Merge Sort) 
 - Graphical representation of arrays, trees, linked lists, and graphs
 - Dynamic step control (play, pause, speed adjust)
-- Educational explanations of algorithm behavior and complexity
+- Educational explanations of algorithm behavior and complexity 
 
 ### Performance Metrics 
 - Benchmark execution times with different input sizes

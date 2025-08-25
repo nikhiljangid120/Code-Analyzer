@@ -1,7 +1,7 @@
 # Code Analyzer & Algorithm Visualizer    
        
 A web-based tool that allows users to analyze code, visualize algorithm execution, and get AI-powered insights. The platform supports multiple programming languages, provides real-time complexity analysis, suggests optimizations, and offers interactive visualizations of data structures and algorithms.    
-
+ 
 ## Features   
     
 ### Code Analyzer 

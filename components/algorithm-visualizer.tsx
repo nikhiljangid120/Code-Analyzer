@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider"
 import { Play, Pause, SkipBack, SkipForward, RefreshCw } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-
+ 
 interface VisualizerProps {
   algorithm: string
   data: number[]

@@ -5,7 +5,7 @@ A web-based tool that allows users to analyze code, visualize algorithm executio
 ## Features   
      
 ### Code Analyzer  
-- Input code in multiple languages (JavaScript, TypeScript, Python, Java, C++) 
+- Input code in multiple languages (JavaScript, TypeScript, Python, Java, C++)  
 - AI-powered analysis using Gemini API   
 - Syntax, structure, and complexity analysis 
 - Optimization suggestions and best practices 

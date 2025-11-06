@@ -10,7 +10,7 @@ A web-based tool that allows users to analyze code, visualize algorithm executio
 - Syntax, structure, and complexity analysis 
 - Optimization suggestions and best practices 
 - Error detection and debugging recommendations
-  
+   
 ### Algorithm Visualizer
 - Step-by-step execution of sorting algorithms (Bubble Sort, Quick Sort, Merge Sort) 
 - Graphical representation of arrays, trees, linked lists, and graphs

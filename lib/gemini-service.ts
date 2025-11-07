@@ -245,7 +245,6 @@ export async function analyzeCode(code: string, language: string): Promise<CodeA
         ]
       }
     `
-
     // Get model with larger token limit for code analysis
     const model = getModel(8192, 0.1) // Lower temperature for more precise results
     

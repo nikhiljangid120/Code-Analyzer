@@ -477,7 +477,7 @@ export default function CodeEditor({
                   <Button variant="ghost" size="sm" onClick={handleClearCode}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                </TooltipTrigger>
+                </TooltipTrigger> 
                 <TooltipContent>Clear code</TooltipContent>
               </Tooltip>
               {/* Stats */}

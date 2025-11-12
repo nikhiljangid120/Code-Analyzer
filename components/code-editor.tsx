@@ -73,9 +73,10 @@ public class Main {
   cpp: `// Two Sum: Find indices of two numbers that add up to target
 #include <vector>
 #include <unordered_map>
+using namespace std;
 
-std::vector<int> twoSum(std::vector<int>& nums, int target) {
-    std::unordered_map<int, int> map;
+vector<int> twoSum(std::vector<int>& nums, int target) {
+    unordered_map<int, int> map;
     for (int i = 0; i < nums.size(); i++) {
         int complement = target - nums[i];
         if (map.find(complement) != map.end()) {
@@ -87,10 +88,10 @@ std::vector<int> twoSum(std::vector<int>& nums, int target) {
 }
 
 int main() {
-    std::vector<int> nums = {2, 7, 11, 15};
+    vector<int> nums = {2, 7, 11, 15};
     int target = 9;
-    std::vector<int> result = twoSum(nums, target);
-    std::cout << "[" << result[0] << ", " << result[1] << "]" << std::endl; // [0, 1]
+    vector<int> result = twoSum(nums, target);
+    cout << "[" << result[0] << ", " << result[1] << "]" << std::endl; // [0, 1]
     return 0;
 }`,
   c: `// Two Sum: Find indices of two numbers that add up to target

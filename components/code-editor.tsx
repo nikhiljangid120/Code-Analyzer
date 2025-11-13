@@ -33,7 +33,6 @@ function twoSum(nums, target) {
   }
   return [];
 }
-
 console.log(twoSum([2, 7, 11, 15], 9)); // [0, 1]`,
   python: `# Two Sum: Find indices of two numbers that add up to target
 def two_sum(nums, target):

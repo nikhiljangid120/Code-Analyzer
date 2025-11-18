@@ -80,7 +80,7 @@ export default function AlgorithmVisualizer({
             setCurrentStep((prev) => prev + 1)
             lastStepTimeRef.current = timestamp
           } else {
-            setIsPlaying(false)
+            setIsPlaying(false) 
             return
           }
         }

@@ -109,7 +109,7 @@ const algorithmDescriptions = {
     useCases: "Cycle detection, topological sorting.",
   },
   dijkstra: {
-    description: "Dijkstra's Algorithm finds the shortest path in a weighted graph.",
+    description: "Dijkstra's Algorithm finds the shortest path in a weighted graph.", 
     timeComplexity: { best: "O((V + E) log V)", average: "O((V + E) log V)", worst: "O((V + E) log V)" },
     spaceComplexity: "O(V)",
     stable: true,

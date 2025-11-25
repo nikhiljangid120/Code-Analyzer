@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 interface Node {
   id: string
   value: number
-  left?: string
+  left?: string 
   right?: string
 }
 

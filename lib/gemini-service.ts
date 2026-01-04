@@ -265,21 +265,34 @@ export async function analyzeCode(code: string, language: string): Promise<CodeA
     const text = response.text()
 
     // Extract and parse JSON
-    try {
-      // Validate input
-      const parsedInput = algorithmSchema.safeParse({ algorithm })
-      if (!parsedInput.success) {
-        console.warn("Input validation failed:", parsedInput.error)
-        return algorithmFallback(algorithm)
-      }
+    const analysisResult = extractJsonFromResponse(text) as CodeAnalysisResult
+    setCachedResult(cacheKey, analysisResult)
+    return analysisResult
+  } catch (error) {
+    console.error("Code analysis error:", error instanceof Error ? error.message : String(error))
+    return codeAnalysisFallback
+  }
+}
 
-      // Check rate limit/cache
-      const cacheKey = `algorithm:${algorithm.toLowerCase()}`
-      const cached = getRateLimitedCachedResult(cacheKey, algorithmFallback(algorithm))
-      if (cached) return cached
+/**
+ * Explains an algorithm and provides detailed feedback
+ */
+export async function explainAlgorithm(algorithm: string): Promise<AlgorithmExplanationResult> {
+  try {
+    // Validate input
+    const parsedInput = algorithmSchema.safeParse({ algorithm })
+    if (!parsedInput.success) {
+      console.warn("Input validation failed:", parsedInput.error)
+      return algorithmFallback(algorithm)
+    }
 
-      // Prepare prompt with more professional language
-      const prompt = `
+    // Check rate limit/cache
+    const cacheKey = `algorithm:${algorithm.toLowerCase()}`
+    const cached = getRateLimitedCachedResult(cacheKey, algorithmFallback(algorithm))
+    if (cached) return cached
+
+    // Prepare prompt with more professional language
+    const prompt = `
       Provide a technical explanation of the ${algorithm} algorithm from a computer science perspective.
       
       Format as JSON with this structure:
@@ -302,29 +315,29 @@ export async function analyzeCode(code: string, language: string): Promise<CodeA
       Focus on technical correctness and precision.
     `
 
-      const model = getModel(4096, 0.1) // Lower temperature for factual accuracy
+    const model = getModel(4096, 0.1) // Lower temperature for factual accuracy
 
-      // Generate with timeout
-      const resultPromise = model.generateContent(prompt)
-      const timeoutPromise = new Promise<null>((_, reject) =>
-        setTimeout(() => reject(new Error("Request timed out")), 20000) // 20 second timeout
-      )
+    // Generate with timeout
+    const resultPromise = model.generateContent(prompt)
+    const timeoutPromise = new Promise<null>((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out")), 20000) // 20 second timeout
+    )
 
-      const result = await Promise.race([resultPromise, timeoutPromise])
-      if (!result) throw new Error("Request timed out")
+    const result = await Promise.race([resultPromise, timeoutPromise])
+    if (!result) throw new Error("Request timed out")
 
-      const response = await result.response
-      const text = response.text()
+    const response = await result.response
+    const text = response.text()
 
-      // Extract and parse JSON
-      const explanationResult = extractJsonFromResponse(text) as AlgorithmExplanationResult
+    // Extract and parse JSON
+    const explanationResult = extractJsonFromResponse(text) as AlgorithmExplanationResult
 
-      // Cache the result
-      setCachedResult(cacheKey, explanationResult)
+    // Cache the result
+    setCachedResult(cacheKey, explanationResult)
 
-      return explanationResult
-    } catch (error) {
-      console.error("Algorithm explanation error:", error instanceof Error ? error.message : String(error))
-      return algorithmFallback(algorithm)
-    }
+    return explanationResult
+  } catch (error) {
+    console.error("Algorithm explanation error:", error instanceof Error ? error.message : String(error))
+    return algorithmFallback(algorithm)
   }
+}

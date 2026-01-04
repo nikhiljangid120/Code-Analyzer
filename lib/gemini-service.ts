@@ -403,11 +403,30 @@ export async function getAlgorithmExplanation(algorithm: string): Promise<Algori
     setCachedResult(cacheKey, explanationResult)
 
     return explanationResult
-  } catch (error) {
-    console.error("Algorithm explanation error:", error instanceof Error ? error.message : String(error))
-    return algorithmFallback(algorithm)
+      ```
+    potentialIssues: [
+      comments === 0 ? "No comments detected. Consider documenting your code." : "Review comment quality.",
+      lineCount > 50 ? "File length is growing. Watch for monolithic code." : "Code length is manageable."
+    ],
+    securityConcerns: [
+      "Static analysis cannot detect deep security flaws.",
+      "Ensure sensitive data is not hardcoded."
+    ],
+    readabilityScore,
+    performanceScore: 7, // Placeholder
+    maintainabilityScore: 7, // Placeholder
+    securityScore: 5, // Placeholder
+    overallScore: Math.round((readabilityScore + 19) / 4 * 10) / 10,
+    codeSnippets: [
+      {
+        original: code.substring(0, 100) + "...",
+        improved: "// Example improvement\n" + code.substring(0, 100) + "...",
+        explanation: "Static analysis mode enabled. Connect to API for advanced refactoring suggestions."
+      }
+    ]
   }
 }
+
 const API_KEY = process.env.GEMINI_API_KEY
 if (!API_KEY) {
   throw new Error("Missing GEMINI_API_KEY environment variable")
@@ -454,7 +473,7 @@ const getModel = (outputTokens = 4096, temp = 0.2) => {
 function extractJsonFromResponse(text: string) {
   // Try multiple patterns to extract JSON
   const jsonMatch =
-    text.match(/```json\s*([\s\S]*?)\s*```/) || // Match code blocks
+    text.match(/```json\s * ([\s\S] *?) \s * ```/) || // Match code blocks
     text.match(/{[\s\S]*}/) ||                  // Match bare JSON
     text.match(/\{[\s\S]*?\}/g)                 // Last resort looser matching
 
@@ -464,7 +483,7 @@ function extractJsonFromResponse(text: string) {
 
   const jsonString = jsonMatch[1] || jsonMatch[0]
   try {
-    return JSON.parse(jsonString.replace(/^```json|```$/g, "").trim())
+    return JSON.parse(jsonString.replace(/^```json | ```$/g, "").trim())
   } catch (parseError) {
     console.error("JSON parse error:", parseError)
     throw new Error("Failed to parse response data")
@@ -601,7 +620,7 @@ async function retryWithBackoff<T>(
 
     // Calculate exponential backoff delay with jitter
     const delay = baseDelay * Math.pow(2, 3 - retries) * (0.5 + Math.random())
-    console.log(`Rate limited. Retrying in ${Math.round(delay)}ms...`)
+    console.log(`Rate limited.Retrying in ${ Math.round(delay) }ms...`)
 
     await new Promise(resolve => setTimeout(resolve, delay))
     return retryWithBackoff(operation, retries - 1, baseDelay)
@@ -626,9 +645,9 @@ function performStaticAnalysis(code: string, language: string): CodeAnalysisResu
   const readabilityScore = Math.min(10, Math.max(1, 10 - (lineCount > 100 ? 2 : 0) - (comments / lineCount < 0.1 ? 2 : 0)))
 
   return {
-    summary: `Static Analysis: Code contains ${lineCount} lines (${nonEmptyLines} non-empty). Detected language signature: ${language}.`,
+    summary: `Static Analysis: Code contains ${ lineCount } lines(${ nonEmptyLines } non - empty).Detected language signature: ${ language }.`,
     complexity: {
-      time: `Estimated O(n) - O(n^${estimatedComplexity}) based on nesting depth of ${maxDepth / 2}`,
+      time: `Estimated O(n) - O(n ^ ${ estimatedComplexity }) based on nesting depth of ${ maxDepth / 2 } `,
       space: "Unknown (Static Analysis only)"
     },
     suggestions: [
@@ -668,7 +687,7 @@ function performStaticAnalysis(code: string, language: string): CodeAnalysisResu
  * Analyzes code and provides detailed feedback on quality, performance, and security
  */
 export async function analyzeCode(code: string, language: string): Promise<CodeAnalysisResult> {
-  const cacheKey = `code:${code.substring(0, 100)}:${language}`
+  const cacheKey = `code:${ code.substring(0, 100) }:${ language } `
 
   try {
     // Validate inputs
@@ -684,9 +703,9 @@ export async function analyzeCode(code: string, language: string): Promise<CodeA
 
     // Prepare prompt
     const prompt = `
-      Analyze the following ${language} code as a senior engineering professional would:
-      
-      \`\`\`${language}
+      Analyze the following ${ language } code as a senior engineering professional would:
+
+    \`\`\`${language}
       ${code}
       \`\`\`
       
@@ -824,3 +843,4 @@ export async function getAlgorithmExplanation(algorithm: string): Promise<Algori
     return algorithmFallback(algorithm)
   }
 }
+```

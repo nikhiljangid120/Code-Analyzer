@@ -396,17 +396,15 @@ export async function getAlgorithmExplanation(algorithm: string): Promise<Algori
 
     const model = getModel(4096, 0.1) // Lower temperature for factual accuracy
 
-    // Generate with timeout
-    const resultPromise = model.generateContent(prompt)
-    const timeoutPromise = new Promise<null>((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out")), 20000) // 20 second timeout
-    )
+    // Wrapper for API call to enable retries
+    const callApi = async () => {
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      return response.text()
+    }
 
-    const result = await Promise.race([resultPromise, timeoutPromise])
-    if (!result) throw new Error("Request timed out")
-
-    const response = await result.response
-    const text = response.text()
+    // Execute with retries
+    const text = await retryWithBackoff(callApi)
 
     // Extract and parse JSON
     const explanationResult = extractJsonFromResponse(text) as AlgorithmExplanationResult

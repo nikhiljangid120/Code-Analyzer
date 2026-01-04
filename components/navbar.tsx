@@ -41,7 +41,7 @@ export default function Navbar() {
               <Code2 className="absolute inset-0 h-5 w-5 m-1.5 text-primary-foreground" />
             </div>
             <span className="font-bold text-xl tracking-tight font-heading">
-              Code<span className="text-primary">Viz</span>
+              Code<span className="text-primary">Viz </span>
             </span>
           </Link>
         </div>

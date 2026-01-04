@@ -1,29 +1,29 @@
-# Code Analyzer & Algorithm Visualizer
-
-A web-based tool that allows users to analyze code, visualize algorithm execution, and get AI-powered insights. The platform supports multiple programming languages, provides real-time complexity analysis, suggests optimizations, and offers interactive visualizations of data structures and algorithms.
-
-## Features
-
-### Code Analyzer
-- Input code in multiple languages (JavaScript, TypeScript, Python, Java, C++)
-- AI-powered analysis using Gemini API
-- Syntax, structure, and complexity analysis
-- Optimization suggestions and best practices
+# Code Analyzer & Algorithm Visualizer    
+       
+A web-based tool that allows users to analyze code, visualize algorithm execution, and get AI-powered insights. The platform supports multiple programming languages, provides real-time complexity analysis, suggests optimizations, and offers interactive visualizations of data structures and algorithms.    
+ 
+## Features   
+     
+### Code Analyzer  
+- Input code in multiple languages (JavaScript, TypeScript, Python, Java, C++)  
+- AI-powered analysis using Gemini API   
+- Syntax, structure, and complexity analysis 
+- Optimization suggestions and best practices 
 - Error detection and debugging recommendations
-
+   
 ### Algorithm Visualizer
-- Step-by-step execution of sorting algorithms (Bubble Sort, Quick Sort, Merge Sort)
+- Step-by-step execution of sorting algorithms (Bubble Sort, Quick Sort, Merge Sort) 
 - Graphical representation of arrays, trees, linked lists, and graphs
 - Dynamic step control (play, pause, speed adjust)
-- Educational explanations of algorithm behavior and complexity
+- Educational explanations of algorithm behavior and complexity 
 
-### Performance Metrics
+### Performance Metrics 
 - Benchmark execution times with different input sizes
 - Graphs showing runtime comparisons
 - Memory consumption analysis
 - Compare multiple algorithms side by side
 
-### User-Friendly UI
+### User-Friendly UI 
 - Modern, responsive design with dark/light mode toggle
 - Syntax highlighting code editor
 - Interactive visualizations
@@ -39,5 +39,5 @@ A web-based tool that allows users to analyze code, visualize algorithm executio
 
 ## Environment Variables
 
-Create a `.env.local` file in the root directory with the following:
+Create a `.env.local` file in the root directory:
 

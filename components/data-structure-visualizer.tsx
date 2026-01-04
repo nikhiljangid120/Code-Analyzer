@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 interface Node {
   id: string
   value: number
-  left?: string
+  left?: string 
   right?: string
 }
 
@@ -2091,4 +2091,8 @@ export default function DataStructureVisualizer({
         </CardContent>
       </Card>
     )
+<<<<<<< HEAD
   }
+=======
+  }
+>>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08

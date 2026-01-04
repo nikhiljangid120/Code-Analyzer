@@ -5,7 +5,11 @@ import { Editor, useMonaco } from "@monaco-editor/react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+<<<<<<< HEAD
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+=======
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip" 
+>>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
 import { Switch } from "@/components/ui/switch"
 import { Copy, Download, Upload, Code, Check, Trash2, Save, Undo, Redo, Info } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
@@ -33,7 +37,18 @@ function twoSum(nums, target) {
   }
   return [];
 }
+console.log(twoSum([2, 7, 11, 15], 9)); // [0, 1]`,
+  python: `# Two Sum: Find indices of two numbers that add up to target
+def two_sum(nums, target):
+    seen = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []
 
+<<<<<<< HEAD
 console.log(twoSum([2, 7, 11, 15], 9)); // [0, 1]`,
   python: `# Two Sum: Find indices of two numbers that add up to target
 def two_sum(nums, target):
@@ -49,6 +64,12 @@ print(two_sum([2, 7, 11, 15], 9))  # [0, 1]`,
   java: `// Two Sum: Find indices of two numbers that add up to target
 import java.util.HashMap;
 
+=======
+print(two_sum([2, 7, 11, 15], 9))  # [0, 1]`,
+  java: `// Two Sum: Find indices of two numbers that add up to target
+import java.util.HashMap;
+
+>>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
 class Solution {
     public int[] twoSum(int[] nums, int target) {
         HashMap<Integer, Integer> map = new HashMap<>();
@@ -73,9 +94,16 @@ public class Main {
   cpp: `// Two Sum: Find indices of two numbers that add up to target
 #include <vector>
 #include <unordered_map>
+<<<<<<< HEAD
 
 std::vector<int> twoSum(std::vector<int>& nums, int target) {
     std::unordered_map<int, int> map;
+=======
+using namespace std;
+
+vector<int> twoSum(std::vector<int>& nums, int target) {
+    unordered_map<int, int> map;
+>>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
     for (int i = 0; i < nums.size(); i++) {
         int complement = target - nums[i];
         if (map.find(complement) != map.end()) {
@@ -87,10 +115,17 @@ std::vector<int> twoSum(std::vector<int>& nums, int target) {
 }
 
 int main() {
+<<<<<<< HEAD
     std::vector<int> nums = {2, 7, 11, 15};
     int target = 9;
     std::vector<int> result = twoSum(nums, target);
     std::cout << "[" << result[0] << ", " << result[1] << "]" << std::endl; // [0, 1]
+=======
+    vector<int> nums = {2, 7, 11, 15};
+    int target = 9;
+    vector<int> result = twoSum(nums, target);
+    cout << "[" << result[0] << ", " << result[1] << "]" << std::endl; // [0, 1]
+>>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
     return 0;
 }`,
   c: `// Two Sum: Find indices of two numbers that add up to target
@@ -477,7 +512,11 @@ export default function CodeEditor({
                   <Button variant="ghost" size="sm" onClick={handleClearCode}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
+<<<<<<< HEAD
                 </TooltipTrigger>
+=======
+                </TooltipTrigger> 
+>>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
                 <TooltipContent>Clear code</TooltipContent>
               </Tooltip>
               {/* Stats */}
@@ -539,4 +578,8 @@ export default function CodeEditor({
       </Card>
     </motion.div>
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08

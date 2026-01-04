@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select" 
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
@@ -109,7 +109,11 @@ const algorithmDescriptions = {
     useCases: "Cycle detection, topological sorting.",
   },
   dijkstra: {
+<<<<<<< HEAD
     description: "Dijkstra's Algorithm finds the shortest path in a weighted graph.",
+=======
+    description: "Dijkstra's Algorithm finds the shortest path in a weighted graph.", 
+>>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
     timeComplexity: { best: "O((V + E) log V)", average: "O((V + E) log V)", worst: "O((V + E) log V)" },
     spaceComplexity: "O(V)",
     stable: true,
@@ -1291,4 +1295,8 @@ export default function PerformanceMetricsPage() {
       `}</style>
     </div>
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08

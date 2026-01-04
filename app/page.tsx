@@ -4,7 +4,7 @@ import { useState } from "react"
 import CodeEditor from "@/components/code-editor"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs" 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Code, CheckCircle, AlertCircle, Lightbulb, Shield, FileCode, Zap, Sparkles } from "lucide-react"
@@ -54,6 +54,16 @@ export default function CodeAnalyzerPage() {
 
       setAnalysisResult(result)
       setRetryCount(0)
+
+      // Check if we are in offline mode/fallback
+      if (result.summary.includes("[Offline Mode]")) {
+        toast({
+          title: "Static Analysis Mode",
+          description: "AI service is busy. Showing static analysis results instead.",
+          variant: "default", // or "warning" if available, but default is safer
+        })
+      }
+
     } catch (error) {
       console.error("Error analyzing code:", error)
 

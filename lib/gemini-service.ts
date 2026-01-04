@@ -149,20 +149,18 @@ const algorithmFallback = (algorithm: string): AlgorithmExplanationResult => ({
   visualizationSteps: [],
 })
 
-// Rate limiting logic
+// Rate limiting logic and Retry mechanism
 const requestCache = new Map<string, { timestamp: number, data: any }>()
-const RATE_LIMIT_MS = 10000 // 10 seconds
+const RATE_LIMIT_MS = 60000 // 1 minute cache for same requests
 
-function getRateLimitedCachedResult<T>(cacheKey: string, fallback: T): T | null {
+function getRateLimitedCachedResult<T>(cacheKey: string, fallback?: T): T | null {
   const cached = requestCache.get(cacheKey)
-
   if (cached) {
     const now = Date.now()
     if (now - cached.timestamp < RATE_LIMIT_MS) {
       return cached.data as T
     }
   }
-
   return null
 }
 
@@ -183,24 +181,102 @@ function setCachedResult(cacheKey: string, data: any): void {
   }
 }
 
+async function retryWithBackoff<T>(
+  operation: () => Promise<T>,
+  retries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  try {
+    return await operation()
+  } catch (error: any) {
+    if (retries === 0 || !error.message?.includes("429")) {
+      throw error
+    }
+
+    // Calculate exponential backoff delay with jitter
+    const delay = baseDelay * Math.pow(2, 3 - retries) * (0.5 + Math.random())
+    console.log(`Rate limited. Retrying in ${Math.round(delay)}ms...`)
+
+    await new Promise(resolve => setTimeout(resolve, delay))
+    return retryWithBackoff(operation, retries - 1, baseDelay)
+  }
+}
+
+function performStaticAnalysis(code: string, language: string): CodeAnalysisResult {
+  const lines = code.split("\n")
+  const lineCount = lines.length
+  const nonEmptyLines = lines.filter(l => l.trim().length > 0).length
+  const comments = lines.filter(l => l.trim().startsWith("//") || l.trim().startsWith("#") || l.trim().startsWith("/*")).length
+
+  // Basic complexity estimation (indentation based)
+  let maxDepth = 0
+  lines.forEach(line => {
+    const indentation = line.search(/\S/)
+    if (indentation > maxDepth) maxDepth = indentation
+  })
+  const estimatedComplexity = Math.min(10, Math.ceil(maxDepth / 4) + 1)
+
+  // Readability score calculation
+  const readabilityScore = Math.min(10, Math.max(1, 10 - (lineCount > 100 ? 2 : 0) - (comments / lineCount < 0.1 ? 2 : 0)))
+
+  return {
+    summary: `Static Analysis: Code contains ${lineCount} lines (${nonEmptyLines} non-empty). Detected language signature: ${language}.`,
+    complexity: {
+      time: `Estimated O(n) - O(n^${estimatedComplexity}) based on nesting depth of ${maxDepth / 2}`,
+      space: "Unknown (Static Analysis only)"
+    },
+    suggestions: [
+      "Add more comments to explain complex logic.",
+      "Ensure meaningful variable names are used.",
+      "Consider breaking down large functions into smaller components."
+    ],
+    bestPractices: [
+      "Follow language-specific style guides.",
+      "Keep functions focused on a single task (SRP).",
+      "Validate all inputs and handle edge cases."
+    ],
+    potentialIssues: [
+      comments === 0 ? "No comments detected. Consider documenting your code." : "Review comment quality.",
+      lineCount > 50 ? "File length is growing. Watch for monolithic code." : "Code length is manageable."
+    ],
+    securityConcerns: [
+      "Static analysis cannot detect deep security flaws.",
+      "Ensure sensitive data is not hardcoded."
+    ],
+    readabilityScore,
+    performanceScore: 7, // Placeholder
+    maintainabilityScore: 7, // Placeholder
+    securityScore: 5, // Placeholder
+    overallScore: Math.round((readabilityScore + 19) / 4 * 10) / 10,
+    codeSnippets: [
+      {
+        original: code.substring(0, 100) + "...",
+        improved: "// Example improvement\n" + code.substring(0, 100) + "...",
+        explanation: "Static analysis mode enabled. Connect to API for advanced refactoring suggestions."
+      }
+    ]
+  }
+}
+
 /**
  * Analyzes code and provides detailed feedback on quality, performance, and security
  */
 export async function analyzeCode(code: string, language: string): Promise<CodeAnalysisResult> {
+  const cacheKey = `code:${code.substring(0, 100)}:${language}`
+
   try {
     // Validate inputs
     const parsedInput = codeAnalysisSchema.safeParse({ code, language })
     if (!parsedInput.success) {
       console.warn("Input validation failed:", parsedInput.error)
-      return codeAnalysisFallback
+      return performStaticAnalysis(code, language)
     }
 
     // Check rate limit/cache
-    const cacheKey = `code:${code.substring(0, 100)}:${language}`
-    const cached = getRateLimitedCachedResult(cacheKey, codeAnalysisFallback)
-    if (cached) return cached
+    const cached = getRateLimitedCachedResult(cacheKey)
+    if (cached) return cached as CodeAnalysisResult
 
-    // Prepare the prompt with more professional, non-AI language
+    // Prepare prompt
     const prompt = `
       Analyze the following ${language} code as a senior engineering professional would:
       
@@ -244,29 +320,36 @@ export async function analyzeCode(code: string, language: string): Promise<CodeA
         ]
       }
     `
-    // Get model with larger token limit for code analysis
-    const model = getModel(8192, 0.1) // Lower temperature for more precise results
 
-    // Generate content with timeout
-    const resultPromise = model.generateContent(prompt)
-    const timeoutPromise = new Promise<null>((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out")), 30000) // 30 second timeout
-    )
+    // Wrapper for API call to enable retries
+    const callApi = async () => {
+      const model = getModel(8192, 0.1)
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      return response.text()
+    }
 
-    const result = await Promise.race([resultPromise, timeoutPromise])
-    if (!result) throw new Error("Request timed out")
-
-    const response = await result.response
-    const text = response.text()
-
-    // Extract and parse JSON
+    // Execute with retries
+    const text = await retryWithBackoff(callApi)
     const analysisResult = extractJsonFromResponse(text) as CodeAnalysisResult
     setCachedResult(cacheKey, analysisResult)
 
     return analysisResult
-  } catch (error) {
+
+  } catch (error: any) {
     console.error("Code analysis error:", error instanceof Error ? error.message : String(error))
-    return codeAnalysisFallback
+
+    // Improved Fallback: Static Analysis
+    const staticResult = performStaticAnalysis(code, language)
+
+    // If it was a rate limit error, we might want to cache this fallback temporarily 
+    // or just return it without caching to encourage retry later. 
+    // For now, let's NOT cache the fallback so the user can hit 'Retry' and maybe get lucky.
+
+    return {
+      ...staticResult,
+      summary: `[Offline Mode] ${staticResult.summary} (API Error: ${error.message?.includes("429") ? "Rate Limit Exceeded" : "Connection Failed"})`
+    }
   }
 }
 

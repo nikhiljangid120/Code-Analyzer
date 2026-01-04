@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 interface Node {
   id: string
   value: number
-  left?: string 
+  left?: string
   right?: string
 }
 
@@ -977,8 +977,8 @@ export default function DataStructureVisualizer({
                             activeOperation === "insert" && index === arrayData.length - 1 && animationStep > 0
                               ? "animate-pulse border-2 border-green-400"
                               : activeOperation === "delete" && index === arrayData.length - 1 && animationStep > 0
-                              ? "animate-pulse border-2 border-red-400"
-                              : "border-2 border-gray-200/50"
+                                ? "animate-pulse border-2 border-red-400"
+                                : "border-2 border-gray-200/50"
                           )}
                           style={{ background: getNodeColor(searchResult.found && searchResult.index === index, index, arrayData.length) }}
                         >
@@ -1027,8 +1027,8 @@ export default function DataStructureVisualizer({
                               activeOperation === "insert" && index === linkedListData.length - 1 && animationStep > 0
                                 ? "animate-pulse border-2 border-green-400"
                                 : activeOperation === "delete" && index === linkedListData.length - 1 && animationStep > 0
-                                ? "animate-pulse border-2 border-red-400"
-                                : "border-2 border-gray-200/50"
+                                  ? "animate-pulse border-2 border-red-400"
+                                  : "border-2 border-gray-200/50"
                             )}
                             style={{ background: getNodeColor(searchResult.found && searchResult.id === node.id, index, linkedListData.length) }}
                           >
@@ -1087,8 +1087,8 @@ export default function DataStructureVisualizer({
                     activeOperation === "insert" && index === stackData.length - 1 && animationStep > 0
                       ? "animate-pulse border-2 border-green-400"
                       : activeOperation === "delete" && index === stackData.length - 1 && animationStep > 0
-                      ? "animate-pulse border-2 border-red-400"
-                      : "border-2 border-gray-200/50",
+                        ? "animate-pulse border-2 border-red-400"
+                        : "border-2 border-gray-200/50",
                     index === stackData.length - 1 ? "rounded-t-lg" : ""
                   )}
                   style={{ background: getNodeColor(searchResult.found && searchResult.id === node.id, index, stackData.length) }}
@@ -1130,8 +1130,8 @@ export default function DataStructureVisualizer({
                       activeOperation === "insert" && index === queueData.length - 1 && animationStep > 0
                         ? "animate-pulse border-2 border-green-400"
                         : activeOperation === "delete" && index === 0 && animationStep > 0
-                        ? "animate-pulse border-2 border-red-400"
-                        : "border-t-2 border-b-2 border-gray-200/50",
+                          ? "animate-pulse border-2 border-red-400"
+                          : "border-t-2 border-b-2 border-gray-200/50",
                       index === queueData.length - 1 ? "border-r-2 rounded-r-lg" : ""
                     )}
                     style={{ background: getNodeColor(searchResult.found && searchResult.id === node.id, index, queueData.length) }}
@@ -1201,8 +1201,8 @@ export default function DataStructureVisualizer({
                                       : activeOperation === "delete" &&
                                         hashTableData[hashTableData.length - 1]?.key === entry.key &&
                                         animationStep > 0
-                                      ? "animate-pulse border-2 border-red-400"
-                                      : "border-2 border-gray-200/50"
+                                        ? "animate-pulse border-2 border-red-400"
+                                        : "border-2 border-gray-200/50"
                                   )}
                                   style={{ background: getNodeColor(searchResult.found && searchResult.id === entry.key, index, hashTableData.length) }}
                                 >
@@ -1635,167 +1635,97 @@ export default function DataStructureVisualizer({
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          />,
-        )
-        elements.push(...renderTreeNodes(nodes, node.left, leftX, leftY, width / 2))
-      }
-      if (node.right) {
-        const rightX = x + width / 2
-        const rightY = y + 80
-        elements.push(
-          <motion.line
-            key={`${node.id}-${node.right}`}
-            x1={x}
-            y1={y + nodeRadius}
-            x2={rightX}
-            y2={rightY - nodeRadius}
-            stroke="rgba(255, 255, 255, 0.3)"
-            strokeWidth="2"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          />,
-        )
-        elements.push(...renderTreeNodes(nodes, node.right, rightX, rightY, width / 2))
-      }
-      return elements
+        />,
+      )
+      elements.push(...renderTreeNodes(nodes, node.left, leftX, leftY, width / 2))
     }
-  
-    const renderGraphNodes = () => {
-      const nodes = graphData.map((node, index) => {
-        const x = ((node.position?.[0] || 0) + 5) * 60
-        const y = ((node.position?.[1] || 0) + 3) * 60
-        return (
-          <motion.g
-            key={node.id}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-          >
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <g>
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={canvasSize.width < 640 ? 20 : 25}
-                      fill={getNodeColor(searchResult.found && searchResult.id === node.id, index, graphData.length)}
-                      stroke="rgba(255, 255, 255, 0.3)"
-                      strokeWidth="2"
-                      className="shadow-lg hover:shadow-xl transition-all duration-300"
-                    />
-                    <text
-                      x={x}
-                      y={y}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="white"
-                      fontSize={canvasSize.width < 640 ? "12" : "14"}
-                      className="font-semibold"
-                    >
-                      {node.value}
-                    </text>
-                  </g>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Value: {node.value}, ID: {node.id}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </motion.g>
-        )
-      })
-      return nodes
+    if (node.right) {
+      const rightX = x + width / 2
+      const rightY = y + 80
+      elements.push(
+        <motion.line
+          key={`${node.id}-${node.right}`}
+          x1={x}
+          y1={y + nodeRadius}
+          x2={rightX}
+          y2={rightY - nodeRadius}
+          stroke="rgba(255, 255, 255, 0.3)"
+          strokeWidth="2"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        />,
+      )
+      elements.push(...renderTreeNodes(nodes, node.right, rightX, rightY, width / 2))
     }
-  
-    const renderGraphEdges = () => {
-      const edges: JSX.Element[] = []
-      graphData.forEach((node) => {
-        node.edges.forEach((targetId) => {
-          const targetNode = graphData.find((n) => n.id === targetId)
-          if (targetNode && node.id < targetId) {
-            const x1 = ((node.position?.[0] || 0) + 5) * 60
-            const y1 = ((node.position?.[1] || 0) + 3) * 60
-            const x2 = ((targetNode.position?.[0] || 0) + 5) * 60
-            const y2 = ((targetNode.position?.[1] || 0) + 3) * 60
-            edges.push(
-              <motion.line
-                key={`${node.id}-${targetId}`}
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                stroke="rgba(255, 255, 255, 0.3)"
-                strokeWidth="2"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              />,
-            )
-          }
-        })
-      })
-      return edges
-    }
-  
-    const renderHeapNodes = (nodes: HeapNode[]) => {
-      const elements: JSX.Element[] = []
-      nodes.forEach((node, index) => {
-        const x = (node.position?.[0] || 0) * 100 + 400
-        const y = (node.position?.[1] || 0) * -80 + 300
-        elements.push(
-          <motion.g
-            key={node.id}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-          >
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <g>
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={canvasSize.width < 640 ? 20 : 25}
-                      fill={getNodeColor(searchResult.found && searchResult.id === node.id, index, nodes.length)}
-                      stroke="rgba(255, 255, 255, 0.3)"
-                      strokeWidth="2"
-                      className="shadow-lg hover:shadow-xl transition-all duration-300"
-                    />
-                    <text
-                      x={x}
-                      y={y}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="white"
-                      fontSize={canvasSize.width < 640 ? "12" : "14"}
-                      className="font-semibold"
-                    >
-                      {node.value}
-                    </text>
-                  </g>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Value: {node.value}, ID: {node.id}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </motion.g>,
-        )
-        const parentIndex = Math.floor((index - 1) / 2)
-        if (index > 0) {
-          const parent = nodes[parentIndex]
-          const parentX = (parent.position?.[0] || 0) * 100 + 400
-          const parentY = (parent.position?.[1] || 0) * -80 + 300
-          elements.push(
+    return elements
+  }
+
+  const renderGraphNodes = () => {
+    const nodes = graphData.map((node, index) => {
+      const x = ((node.position?.[0] || 0) + 5) * 60
+      const y = ((node.position?.[1] || 0) + 3) * 60
+      return (
+        <motion.g
+          key={node.id}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <g>
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={canvasSize.width < 640 ? 20 : 25}
+                    fill={getNodeColor(searchResult.found && searchResult.id === node.id, index, graphData.length)}
+                    stroke="rgba(255, 255, 255, 0.3)"
+                    strokeWidth="2"
+                    className="shadow-lg hover:shadow-xl transition-all duration-300"
+                  />
+                  <text
+                    x={x}
+                    y={y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="white"
+                    fontSize={canvasSize.width < 640 ? "12" : "14"}
+                    className="font-semibold"
+                  >
+                    {node.value}
+                  </text>
+                </g>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Value: {node.value}, ID: {node.id}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </motion.g>
+      )
+    })
+    return nodes
+  }
+
+  const renderGraphEdges = () => {
+    const edges: JSX.Element[] = []
+    graphData.forEach((node) => {
+      node.edges.forEach((targetId) => {
+        const targetNode = graphData.find((n) => n.id === targetId)
+        if (targetNode && node.id < targetId) {
+          const x1 = ((node.position?.[0] || 0) + 5) * 60
+          const y1 = ((node.position?.[1] || 0) + 3) * 60
+          const x2 = ((targetNode.position?.[0] || 0) + 5) * 60
+          const y2 = ((targetNode.position?.[1] || 0) + 3) * 60
+          edges.push(
             <motion.line
-              key={`${node.id}-parent`}
-              x1={x}
-              y1={y}
-              x2={parentX}
-              y2={parentY}
+              key={`${node.id}-${targetId}`}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
               stroke="rgba(255, 255, 255, 0.3)"
               strokeWidth="2"
               initial={{ pathLength: 0 }}
@@ -1805,294 +1735,360 @@ export default function DataStructureVisualizer({
           )
         }
       })
-      return elements
-    }
-  
-    const handleColorModeChange = (mode: "default" | "rainbow" | "heat" | "pastel") => {
-      setCurrentColorMode(mode)
-    }
-  
-    const renderDetails = () => {
-      const info = dataStructureInfo[dataStructure]
-      return (
-        <div className="mt-4 p-4 sm:p-6 bg-gray-800/50 rounded-xl shadow-lg">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 capitalize">{dataStructure} Details</h2>
-          <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-gray-800 p-2 rounded-lg w-full overflow-x-auto">
-        <TabsTrigger
-          value="overview"
-          className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
-        >
-          Overview
-        </TabsTrigger>
-        <TabsTrigger
-          value="complexity"
-          className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
-        >
-          Complexity
-        </TabsTrigger>
-        <TabsTrigger
-          value="pros-cons"
-          className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
-        >
-          Pros & Cons
-        </TabsTrigger>
-        <TabsTrigger
-          value="applications"
-          className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
-        >
-          Applications
-        </TabsTrigger>
-      </TabsList>
+    })
+    return edges
+  }
 
-      <TabsContent value="overview" className="mt-4">
-        <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-white">Definition</h3>
-            <p className="text-gray-300 text-sm sm:text-base">{info.definition}</p>
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-white">Why Use It?</h3>
-            <p className="text-gray-300 text-sm sm:text-base">{info.why}</p>
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-white">When to Use?</h3>
-            <p className="text-gray-300 text-sm sm:text-base">{info.when}</p>
-          </div>
-        </div>
-      </TabsContent>
-
-      <TabsContent value="complexity" className="mt-4">
-        <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-white">Time Complexity</h3>
-            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
-              <li>Access: {info.timeComplexity.access}</li>
-              <li>Search: {info.timeComplexity.search}</li>
-              <li>Insert: {info.timeComplexity.insert}</li>
-              <li>Delete: {info.timeComplexity.delete}</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-white">Space Complexity</h3>
-            <p className="text-gray-300 text-sm sm:text-base">{info.spaceComplexity}</p>
-          </div>
-        </div>
-      </TabsContent>
-
-      <TabsContent value="pros-cons" className="mt-4">
-        <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-white">Advantages</h3>
-            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
-              {info.advantages.map((advantage, index) => (
-                <li key={index}>{advantage}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-white">Disadvantages</h3>
-            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
-              {info.disadvantages.map((disadvantage, index) => (
-                <li key={index}>{disadvantage}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </TabsContent>
-
-      <TabsContent value="applications" className="mt-4">
-        <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-white">Example Problems</h3>
-            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
-              {info.exampleProblems.map((problem, index) => (
-                <li key={index}>{problem}</li>
-              ))}
-              {/* Note: "prescription drug names" seems like a stray text in the original; removed unless it's intentional */}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-white">Real-World Applications</h3>
-            <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
-              {info.realWorldApplications.map((application, index) => (
-                <li key={index}>{application}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </TabsContent>
-    </Tabs>
-        </div>
+  const renderHeapNodes = (nodes: HeapNode[]) => {
+    const elements: JSX.Element[] = []
+    nodes.forEach((node, index) => {
+      const x = (node.position?.[0] || 0) * 100 + 400
+      const y = (node.position?.[1] || 0) * -80 + 300
+      elements.push(
+        <motion.g
+          key={node.id}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <g>
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={canvasSize.width < 640 ? 20 : 25}
+                    fill={getNodeColor(searchResult.found && searchResult.id === node.id, index, nodes.length)}
+                    stroke="rgba(255, 255, 255, 0.3)"
+                    strokeWidth="2"
+                    className="shadow-lg hover:shadow-xl transition-all duration-300"
+                  />
+                  <text
+                    x={x}
+                    y={y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="white"
+                    fontSize={canvasSize.width < 640 ? "12" : "14"}
+                    className="font-semibold"
+                  >
+                    {node.value}
+                  </text>
+                </g>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Value: {node.value}, ID: {node.id}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </motion.g>,
       )
-    }
-  
+      const parentIndex = Math.floor((index - 1) / 2)
+      if (index > 0) {
+        const parent = nodes[parentIndex]
+        const parentX = (parent.position?.[0] || 0) * 100 + 400
+        const parentY = (parent.position?.[1] || 0) * -80 + 300
+        elements.push(
+          <motion.line
+            key={`${node.id}-parent`}
+            x1={x}
+            y1={y}
+            x2={parentX}
+            y2={parentY}
+            stroke="rgba(255, 255, 255, 0.3)"
+            strokeWidth="2"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />,
+        )
+      }
+    })
+    return elements
+  }
+
+  const handleColorModeChange = (mode: "default" | "rainbow" | "heat" | "pastel") => {
+    setCurrentColorMode(mode)
+  }
+
+  const renderDetails = () => {
+    const info = dataStructureInfo[dataStructure]
     return (
-      <Card className="w-full bg-gray-900/50 border-gray-800 shadow-xl">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-white capitalize">{dataStructure} Visualizer</h2>
-            <div className="flex flex-wrap gap-2 sm:gap-3">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setShowDetails(!showDetails)}
-                      className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+      <div className="mt-4 p-4 sm:p-6 bg-gray-800/50 rounded-xl shadow-lg">
+        <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 capitalize">{dataStructure} Details</h2>
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-gray-800 p-2 rounded-lg w-full overflow-x-auto">
+            <TabsTrigger
+              value="overview"
+              className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="complexity"
+              className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
+            >
+              Complexity
+            </TabsTrigger>
+            <TabsTrigger
+              value="pros-cons"
+              className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
+            >
+              Pros & Cons
+            </TabsTrigger>
+            <TabsTrigger
+              value="applications"
+              className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200 whitespace-nowrap"
+            >
+              Applications
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-4">
+            <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">Definition</h3>
+                <p className="text-gray-300 text-sm sm:text-base">{info.definition}</p>
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">Why Use It?</h3>
+                <p className="text-gray-300 text-sm sm:text-base">{info.why}</p>
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">When to Use?</h3>
+                <p className="text-gray-300 text-sm sm:text-base">{info.when}</p>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="complexity" className="mt-4">
+            <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">Time Complexity</h3>
+                <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+                  <li>Access: {info.timeComplexity.access}</li>
+                  <li>Search: {info.timeComplexity.search}</li>
+                  <li>Insert: {info.timeComplexity.insert}</li>
+                  <li>Delete: {info.timeComplexity.delete}</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">Space Complexity</h3>
+                <p className="text-gray-300 text-sm sm:text-base">{info.spaceComplexity}</p>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="pros-cons" className="mt-4">
+            <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">Advantages</h3>
+                <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+                  {info.advantages.map((advantage, index) => (
+                    <li key={index}>{advantage}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">Disadvantages</h3>
+                <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+                  {info.disadvantages.map((disadvantage, index) => (
+                    <li key={index}>{disadvantage}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="applications" className="mt-4">
+            <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">Example Problems</h3>
+                <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+                  {info.exampleProblems.map((problem, index) => (
+                    <li key={index}>{problem}</li>
+                  ))}
+                  {/* Note: "prescription drug names" seems like a stray text in the original; removed unless it's intentional */}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">Real-World Applications</h3>
+                <ul className="list-disc list-inside text-gray-300 text-sm sm:text-base">
+                  {info.realWorldApplications.map((application, index) => (
+                    <li key={index}>{application}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    )
+  }
+
+  return (
+    <Card className="w-full bg-gray-900/50 border-gray-800 shadow-xl">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-white capitalize">{dataStructure} Visualizer</h2>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowDetails(!showDetails)}
+                    className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+                  >
+                    <Info className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{showDetails ? "Hide" : "Show"} Details</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleReset}
+                    className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+                    disabled={isAnimating}
+                  >
+                    <RefreshCw className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Reset Data</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleRandomize}
+                    className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+                    disabled={isAnimating}
+                  >
+                    <svg
+                      className="h-4 w-4 sm:h-5 sm:w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <Info className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{showDetails ? "Hide" : "Show"} Details</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleReset}
-                      className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
-                      disabled={isAnimating}
-                    >
-                      <RefreshCw className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Reset Data</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleRandomize}
-                      className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
-                      disabled={isAnimating}
-                    >
-                      <svg
-                        className="h-4 w-4 sm:h-5 sm:w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        />
-                      </svg>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Randomize Data</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() =>
-                        handleColorModeChange(
-                          currentColorMode === "default"
-                            ? "rainbow"
-                            : currentColorMode === "rainbow"
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Randomize Data</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      handleColorModeChange(
+                        currentColorMode === "default"
+                          ? "rainbow"
+                          : currentColorMode === "rainbow"
                             ? "heat"
                             : currentColorMode === "heat"
-                            ? "pastel"
-                            : "default",
-                        )
-                      }
-                      className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
-                    >
-                      <Palette className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Change Color Mode: {currentColorMode}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+                              ? "pastel"
+                              : "default",
+                      )
+                    }
+                    className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+                  >
+                    <Palette className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Change Color Mode: {currentColorMode}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <div className="flex flex-1 gap-2 sm:gap-3">
-              {dataStructure === "hashTable" && (
-                <Input
-                  type="text"
-                  placeholder="Key"
-                  value={newKey}
-                  onChange={(e) => setNewKey(e.target.value)}
-                  className="bg-gray-800 text-white border-gray-600 focus:border-blue-500 w-24 sm:w-32"
-                  disabled={isAnimating}
-                />
-              )}
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex flex-1 gap-2 sm:gap-3">
+            {dataStructure === "hashTable" && (
               <Input
-                type="number"
-                placeholder="Value"
-                value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
+                type="text"
+                placeholder="Key"
+                value={newKey}
+                onChange={(e) => setNewKey(e.target.value)}
                 className="bg-gray-800 text-white border-gray-600 focus:border-blue-500 w-24 sm:w-32"
                 disabled={isAnimating}
               />
-              <Button
-                onClick={handleAddValue}
-                className="bg-green-600 hover:bg-green-700 text-white"
-                disabled={isAnimating}
-              >
-                <Plus className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Add
-              </Button>
-              <Button
-                onClick={handleDeleteValue}
-                className="bg-red-600 hover:bg-red-700 text-white"
-                disabled={isAnimating}
-              >
-                <Trash className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Delete
-              </Button>
-            </div>
-            <div className="flex gap-2 sm:gap-3">
-              <Input
-                type="number"
-                placeholder="Search value"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                className="bg-gray-800 text-white border-gray-600 focus:border-blue-500 w-24 sm:w-32"
-                disabled={isAnimating}
-              />
-              <Button
-                onClick={handleSearch}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={isAnimating}
-              >
-                <Search className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Search
-              </Button>
-            </div>
+            )}
+            <Input
+              type="number"
+              placeholder="Value"
+              value={newValue}
+              onChange={(e) => setNewValue(e.target.value)}
+              className="bg-gray-800 text-white border-gray-600 focus:border-blue-500 w-24 sm:w-32"
+              disabled={isAnimating}
+            />
+            <Button
+              onClick={handleAddValue}
+              className="bg-green-600 hover:bg-green-700 text-white"
+              disabled={isAnimating}
+            >
+              <Plus className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Add
+            </Button>
+            <Button
+              onClick={handleDeleteValue}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isAnimating}
+            >
+              <Trash className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Delete
+            </Button>
           </div>
-          <div
-            className="relative rounded-lg overflow-hidden shadow-lg"
-            style={{ height: `${height}px`, minHeight: "300px" }}
-          >
-            {renderDataStructure()}
+          <div className="flex gap-2 sm:gap-3">
+            <Input
+              type="number"
+              placeholder="Search value"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="bg-gray-800 text-white border-gray-600 focus:border-blue-500 w-24 sm:w-32"
+              disabled={isAnimating}
+            />
+            <Button
+              onClick={handleSearch}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isAnimating}
+            >
+              <Search className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Search
+            </Button>
           </div>
-          {showDetails && renderDetails()}
-        </CardContent>
-      </Card>
-    )
-<<<<<<< HEAD
-  }
-=======
-  }
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
+        </div>
+        <div
+          className="relative rounded-lg overflow-hidden shadow-lg"
+          style={{ height: `${height}px`, minHeight: "300px" }}
+        >
+          {renderDataStructure()}
+        </div>
+        {showDetails && renderDetails()}
+      </CardContent>
+    </Card>
+  )
+}

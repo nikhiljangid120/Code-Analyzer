@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider"
 import { Play, Pause, SkipBack, SkipForward, RefreshCw } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
- 
+
 interface VisualizerProps {
   algorithm: string
   data: number[]
@@ -80,7 +80,7 @@ export default function AlgorithmVisualizer({
             setCurrentStep((prev) => prev + 1)
             lastStepTimeRef.current = timestamp
           } else {
-            setIsPlaying(false) 
+            setIsPlaying(false)
             return
           }
         }
@@ -928,8 +928,4 @@ function generateShellSortSteps(data: BarData[]): {
   steps.push(JSON.parse(JSON.stringify(arr)))
 
   return { steps, comparisons, swaps }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08

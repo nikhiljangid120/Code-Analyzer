@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select" 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Book, GraduationCap, Code, Clock, Zap, Database, TrendingUp, Cpu, BarChart2, PieChart as PieChartIcon, LineChart as LineChartIcon, Download, Share2, Maximize2, HelpCircle, RefreshCw, AlertTriangle, Info, Search, Network, Map, Navigation, Layers, Loader2 } from "lucide-react"
-import { 
+import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer, BarChart, Bar, Tooltip, Area, AreaChart, PieChart, Pie, Cell, ScatterChart, Scatter, ZAxis
 } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -109,11 +109,7 @@ const algorithmDescriptions = {
     useCases: "Cycle detection, topological sorting.",
   },
   dijkstra: {
-<<<<<<< HEAD
     description: "Dijkstra's Algorithm finds the shortest path in a weighted graph.",
-=======
-    description: "Dijkstra's Algorithm finds the shortest path in a weighted graph.", 
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
     timeComplexity: { best: "O((V + E) log V)", average: "O((V + E) log V)", worst: "O((V + E) log V)" },
     spaceComplexity: "O(V)",
     stable: true,
@@ -387,13 +383,13 @@ const generateEfficiencyData = () => {
     const seed = Math.random()
     return {
       algorithm: algo.name,
-      speed: ['bubble', 'selection', 'insertion', 'floyd'].includes(algo.id) ? 
+      speed: ['bubble', 'selection', 'insertion', 'floyd'].includes(algo.id) ?
         Math.floor(20 + seed * 30) : Math.floor(70 + seed * 30),
-      memory: ['merge', 'floyd'].includes(algo.id) ? 
+      memory: ['merge', 'floyd'].includes(algo.id) ?
         Math.floor(30 + seed * 30) : Math.floor(60 + seed * 40),
-      simplicity: ['quick', 'merge', 'dijkstra', 'floyd', 'kmp', 'boyer'].includes(algo.id) ? 
+      simplicity: ['quick', 'merge', 'dijkstra', 'floyd', 'kmp', 'boyer'].includes(algo.id) ?
         Math.floor(30 + seed * 30) : Math.floor(70 + seed * 30),
-      stability: ['merge', 'bubble', 'insertion', 'binary', 'bfs', 'dfs', 'dijkstra', 'floyd', 'kmp', 'boyer', 'kadane', 'slowfast'].includes(algo.id) ? 
+      stability: ['merge', 'bubble', 'insertion', 'binary', 'bfs', 'dfs', 'dijkstra', 'floyd', 'kmp', 'boyer', 'kadane', 'slowfast'].includes(algo.id) ?
         Math.floor(80 + seed * 20) : Math.floor(30 + seed * 40),
     }
   })
@@ -536,8 +532,8 @@ export default function PerformanceMetricsPage() {
   }
 
   const categories = ["All", ...new Set(algorithmOptions.map(opt => opt.category))]
-  const filteredAlgorithms = categoryFilter === "All" 
-    ? algorithmOptions 
+  const filteredAlgorithms = categoryFilter === "All"
+    ? algorithmOptions
     : algorithmOptions.filter(opt => opt.category === categoryFilter)
 
   const selectedAlgorithm = algorithmOptions.find(opt => opt.id === algorithm)
@@ -1295,8 +1291,4 @@ export default function PerformanceMetricsPage() {
       `}</style>
     </div>
   )
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08

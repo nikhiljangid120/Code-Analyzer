@@ -1,30 +1,24 @@
 "use server"
-import Groq from "groq-sdk"
-import { z } from "zod" // For input validation
+import { GoogleGenerativeAI } from "@google/generative-ai"
+import { z } from "zod"
 
-// Initialize the Groq client with the API key
-const API_KEY = process.env.GROQ_API_KEY
-// Note: Groq SDK automatically looks for GROQ_API_KEY, but we check explicitly for better error messages
+// Initialize the Gemini client
+const API_KEY = process.env.GEMINI_API_KEY
 if (!API_KEY) {
-  console.warn("Missing GROQ_API_KEY environment variable. AI features will use fallback.")
+  console.warn("Missing GEMINI_API_KEY environment variable. AI features will use fallback.")
 }
 
-const groq = new Groq({
-  apiKey: API_KEY || "dummy_key", // Prevent crash on init if key is missing, validation happens later
-  dangerouslyAllowBrowser: true // Since we are using "use server", this shouldn't be needed for client-side, but good for local testing if mixed. 
-  // Actually, "use server" means this runs on node. 
-})
+const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null
 
-// Centralized model configuration
-const MODEL_NAME = "llama3-70b-8192" // High performance open source model suitable for code
+// Model configuration
+const MODEL_NAME = "gemini-1.5-flash"
 
 // Helper function to extract and parse JSON from AI responses
 function extractJsonFromResponse(text: string) {
-  // Try multiple patterns to extract JSON
   const jsonMatch =
-    text.match(/```json\s*([\s\S]*?)\s*```/) || // Match code blocks
-    text.match(/{[\s\S]*}/) ||                  // Match bare JSON
-    text.match(/\{[\s\S]*?\}/g)                 // Last resort looser matching
+    text.match(/```json\s*([\s\S]*?)\s*```/) ||
+    text.match(/\{[\s\S]*\}/) ||
+    text.match(/\{[\s\S]*?\}/g)
 
   if (!jsonMatch) {
     throw new Error("Could not extract JSON from response")
@@ -91,10 +85,7 @@ const algorithmSchema = z.object({
 // Fallback responses
 const codeAnalysisFallback: CodeAnalysisResult = {
   summary: "Analysis could not be completed",
-  complexity: {
-    time: "Unknown",
-    space: "Unknown",
-  },
+  complexity: { time: "Unknown", space: "Unknown" },
   suggestions: ["Try again with a different code sample"],
   bestPractices: [],
   potentialIssues: [],
@@ -110,11 +101,7 @@ const codeAnalysisFallback: CodeAnalysisResult = {
 const algorithmFallback = (algorithm: string): AlgorithmExplanationResult => ({
   name: algorithm,
   description: "Explanation could not be generated",
-  timeComplexity: {
-    best: "Unknown",
-    average: "Unknown",
-    worst: "Unknown",
-  },
+  timeComplexity: { best: "Unknown", average: "Unknown", worst: "Unknown" },
   spaceComplexity: "Unknown",
   pseudocode: "Could not generate pseudocode",
   advantages: [],
@@ -123,34 +110,24 @@ const algorithmFallback = (algorithm: string): AlgorithmExplanationResult => ({
   visualizationSteps: [],
 })
 
-// Rate limiting logic and Retry mechanism
+// Rate limiting and caching
 const requestCache = new Map<string, { timestamp: number, data: any }>()
-const RATE_LIMIT_MS = 60000 // 1 minute cache for same requests
+const RATE_LIMIT_MS = 60000
 
-function getRateLimitedCachedResult<T>(cacheKey: string, fallback?: T): T | null {
+function getRateLimitedCachedResult<T>(cacheKey: string): T | null {
   const cached = requestCache.get(cacheKey)
-  if (cached) {
-    const now = Date.now()
-    if (now - cached.timestamp < RATE_LIMIT_MS) {
-      return cached.data as T
-    }
+  if (cached && Date.now() - cached.timestamp < RATE_LIMIT_MS) {
+    return cached.data as T
   }
   return null
 }
 
 function setCachedResult(cacheKey: string, data: any): void {
-  requestCache.set(cacheKey, {
-    timestamp: Date.now(),
-    data
-  })
-
-  // Clean old cache entries
+  requestCache.set(cacheKey, { timestamp: Date.now(), data })
   if (requestCache.size > 100) {
     const now = Date.now()
     requestCache.forEach((value, key) => {
-      if (now - value.timestamp > 3600000) { // 1 hour
-        requestCache.delete(key)
-      }
+      if (now - value.timestamp > 3600000) requestCache.delete(key)
     })
   }
 }
@@ -163,15 +140,12 @@ async function retryWithBackoff<T>(
   try {
     return await operation()
   } catch (error: any) {
-    // Retry on 429 (Rate Limit) or 5xx (Server Errors)
-    if (retries === 0 || (!error.message?.includes("429") && !error.message?.includes("50"))) {
+    const errorMessage = error.message || String(error)
+    if (retries === 0 || (!errorMessage.includes("429") && !errorMessage.includes("50") && !errorMessage.includes("503"))) {
       throw error
     }
-
-    // Calculate exponential backoff delay with jitter
     const delay = baseDelay * Math.pow(2, 3 - retries) * (0.5 + Math.random())
     console.log(`API Request failed. Retrying in ${Math.round(delay)}ms...`)
-
     await new Promise(resolve => setTimeout(resolve, delay))
     return retryWithBackoff(operation, retries - 1, baseDelay)
   }
@@ -183,230 +157,168 @@ function performStaticAnalysis(code: string, language: string): CodeAnalysisResu
   const nonEmptyLines = lines.filter(l => l.trim().length > 0).length
   const comments = lines.filter(l => l.trim().startsWith("//") || l.trim().startsWith("#") || l.trim().startsWith("/*")).length
 
-  // Basic complexity estimation (indentation based)
   let maxDepth = 0
   lines.forEach(line => {
     const indentation = line.search(/\S/)
     if (indentation > maxDepth) maxDepth = indentation
   })
   const estimatedComplexity = Math.min(10, Math.ceil(maxDepth / 4) + 1)
-
-  // Readability score calculation
   const readabilityScore = Math.min(10, Math.max(1, 10 - (lineCount > 100 ? 2 : 0) - (comments / lineCount < 0.1 ? 2 : 0)))
 
   return {
-    summary: `Static Analysis: Code contains ${lineCount} lines (${nonEmptyLines} non-empty). Detected language signature: ${language}.`,
+    summary: `Static Analysis: Code contains ${lineCount} lines (${nonEmptyLines} non-empty). Language: ${language}.`,
     complexity: {
-      time: `Estimated O(n) - O(n^${estimatedComplexity}) based on nesting depth of ${maxDepth / 2}`,
+      time: `Estimated O(n) - O(n^${estimatedComplexity}) based on nesting depth`,
       space: "Unknown (Static Analysis only)"
     },
     suggestions: [
       "Add more comments to explain complex logic.",
-      "Ensure meaningful variable names are used.",
-      "Consider breaking down large functions into smaller components."
+      "Use meaningful variable names.",
+      "Consider breaking down large functions."
     ],
     bestPractices: [
       "Follow language-specific style guides.",
-      "Keep functions focused on a single task (SRP).",
-      "Validate all inputs and handle edge cases."
+      "Keep functions focused on a single task.",
+      "Validate all inputs."
     ],
     potentialIssues: [
-      comments === 0 ? "No comments detected. Consider documenting your code." : "Review comment quality.",
-      lineCount > 50 ? "File length is growing. Watch for monolithic code." : "Code length is manageable."
+      comments === 0 ? "No comments detected." : "Review comment quality.",
+      lineCount > 50 ? "File length is growing." : "Code length is manageable."
     ],
     securityConcerns: [
       "Static analysis cannot detect deep security flaws.",
       "Ensure sensitive data is not hardcoded."
     ],
     readabilityScore,
-    performanceScore: 7, // Placeholder
-    maintainabilityScore: 7, // Placeholder
-    securityScore: 5, // Placeholder
+    performanceScore: 7,
+    maintainabilityScore: 7,
+    securityScore: 5,
     overallScore: Math.round((readabilityScore + 19) / 4 * 10) / 10,
-    codeSnippets: [
-      {
-        original: code.substring(0, 100) + "...",
-        improved: "// Example improvement\n" + code.substring(0, 100) + "...",
-        explanation: "Static analysis mode enabled. Connect to API for advanced refactoring suggestions."
-      }
-    ]
+    codeSnippets: [{
+      original: code.substring(0, 100) + "...",
+      improved: "// Example improvement\n" + code.substring(0, 100) + "...",
+      explanation: "Static analysis mode. Connect to API for advanced suggestions."
+    }]
   }
 }
 
-/**
- * Analyzes code and provides detailed feedback on quality, performance, and security
- */
 export async function analyzeCode(code: string, language: string): Promise<CodeAnalysisResult> {
   const cacheKey = `code:${code.substring(0, 100)}:${language}`
 
   try {
-    // Validate inputs
     const parsedInput = codeAnalysisSchema.safeParse({ code, language })
     if (!parsedInput.success) {
-      console.warn("Input validation failed:", parsedInput.error)
       return performStaticAnalysis(code, language)
     }
 
-    if (!API_KEY) {
+    if (!genAI) {
       return performStaticAnalysis(code, language)
     }
 
-    // Check rate limit/cache
     const cached = getRateLimitedCachedResult(cacheKey)
     if (cached) return cached as CodeAnalysisResult
 
-    // Prepare prompt
     const prompt = `
-      Analyze the following ${language} code as a senior engineering professional would:
+      Analyze the following ${language} code as a senior engineering professional:
       
       \`\`\`${language}
       ${code}
       \`\`\`
       
-      Provide a technical analysis with:
-      1. A technical summary of functionality
-      2. Time and space complexity analysis with Big O notation
-      3. Specific optimization recommendations with examples
-      4. Industry best practices that would improve the code
-      5. Potential bugs, edge cases and issues
-      6. Security vulnerabilities or concerns
-      7. Technical scores (1-10) for: readability, performance, maintainability, security
+      Provide analysis with:
+      1. Technical summary
+      2. Time and space complexity (Big O)
+      3. Optimization recommendations
+      4. Best practices
+      5. Potential bugs and issues
+      6. Security vulnerabilities
+      7. Scores (1-10): readability, performance, maintainability, security
       8. Overall quality score (1-10)
-      9. 1-3 code snippets showing specific improvements with technical justification
+      9. 1-3 code snippets showing improvements
       
-      Format as JSON with this structure:
+      Format as JSON:
       {
-        "summary": "Technical description of the code",
-        "complexity": {
-          "time": "Time complexity with explanation",
-          "space": "Space complexity with explanation"
-        },
-        "suggestions": ["Suggestion 1", "Suggestion 2"...],
-        "bestPractices": ["Best practice 1", "Best practice 2"...],
-        "potentialIssues": ["Issue 1", "Issue 2"...],
-        "securityConcerns": ["Security concern 1", "Security concern 2"...],
+        "summary": "...",
+        "complexity": { "time": "...", "space": "..." },
+        "suggestions": ["..."],
+        "bestPractices": ["..."],
+        "potentialIssues": ["..."],
+        "securityConcerns": ["..."],
         "readabilityScore": 7,
         "performanceScore": 6,
         "maintainabilityScore": 8,
         "securityScore": 5,
         "overallScore": 6.5,
-        "codeSnippets": [
-          {
-            "original": "Original code snippet",
-            "improved": "Improved code snippet",
-            "explanation": "Technical justification for improvements"
-          }
-        ]
+        "codeSnippets": [{ "original": "...", "improved": "...", "explanation": "..." }]
       }
     `
 
-    // Wrapper for API call to enable retries
     const callApi = async () => {
-      const completion = await groq.chat.completions.create({
-        messages: [
-          { role: "system", content: "You are an expert code analyst. You always respond with valid JSON only, no markdown formatting outside the JSON block." },
-          { role: "user", content: prompt }
-        ],
-        model: MODEL_NAME,
-        temperature: 0.1,
-        max_tokens: 8192,
-        response_format: { type: "json_object" }
-      });
-      return completion.choices[0]?.message?.content || "{}"
+      const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+      const result = await model.generateContent(prompt)
+      return result.response.text()
     }
 
-    // Execute with retries
     const text = await retryWithBackoff(callApi)
     const analysisResult = extractJsonFromResponse(text) as CodeAnalysisResult
     setCachedResult(cacheKey, analysisResult)
-
     return analysisResult
 
   } catch (error: any) {
-    console.error("Code analysis error:", error instanceof Error ? error.message : String(error))
-
-    // Improved Fallback: Static Analysis
+    console.error("Code analysis error:", error.message || error)
     const staticResult = performStaticAnalysis(code, language)
-
     return {
       ...staticResult,
-      summary: `[Offline Mode] ${staticResult.summary} (API Error: ${error.message?.includes("429") ? "Groq Rate Limit" : "Connection Failed"})`
+      summary: `[Offline Mode] ${staticResult.summary} (API Error: ${error.message?.includes("429") ? "Rate Limit" : "Connection Failed"})`
     }
   }
 }
 
-/**
- * Provides in-depth explanation of algorithms with complexity analysis and examples
- */
 export async function getAlgorithmExplanation(algorithm: string): Promise<AlgorithmExplanationResult> {
   try {
-    // Validate input
     const parsedInput = algorithmSchema.safeParse({ algorithm })
     if (!parsedInput.success) {
-      console.warn("Input validation failed:", parsedInput.error)
       return algorithmFallback(algorithm)
     }
 
-    if (!API_KEY) {
+    if (!genAI) {
       return algorithmFallback(algorithm)
     }
 
-    // Check rate limit/cache
     const cacheKey = `algorithm:${algorithm.toLowerCase()}`
-    const cached = getRateLimitedCachedResult(cacheKey, algorithmFallback(algorithm))
-    if (cached) return cached
+    const cached = getRateLimitedCachedResult(cacheKey)
+    if (cached) return cached as AlgorithmExplanationResult
 
-    // Prepare prompt with more professional language
     const prompt = `
-      Provide a technical explanation of the ${algorithm} algorithm from a computer science perspective.
+      Explain the ${algorithm} algorithm technically.
       
-      Format as JSON with this structure:
+      Format as JSON:
       {
-        "name": "Full name of the algorithm",
-        "description": "Technical description of how the algorithm works",
-        "timeComplexity": {
-          "best": "Best case time complexity with mathematical justification",
-          "average": "Average case time complexity with mathematical justification",
-          "worst": "Worst case time complexity with mathematical justification"
-        },
-        "spaceComplexity": "Space complexity with mathematical justification",
-        "pseudocode": "Pseudocode representation following standard conventions",
-        "advantages": ["Technical advantage 1", "Technical advantage 2"...],
-        "disadvantages": ["Technical limitation 1", "Technical limitation 2"...],
-        "useCases": ["Application 1", "Application 2"...],
-        "visualizationSteps": ["Step 1 with technical details", "Step 2 with technical details"...]
+        "name": "Full name",
+        "description": "How it works",
+        "timeComplexity": { "best": "...", "average": "...", "worst": "..." },
+        "spaceComplexity": "...",
+        "pseudocode": "...",
+        "advantages": ["..."],
+        "disadvantages": ["..."],
+        "useCases": ["..."],
+        "visualizationSteps": ["..."]
       }
-      
-      Focus on technical correctness and precision.
     `
 
-    // Wrapper for API call to enable retries
     const callApi = async () => {
-      const completion = await groq.chat.completions.create({
-        messages: [
-          { role: "system", content: "You are an expert algorithm tutor. You always respond with valid JSON only." },
-          { role: "user", content: prompt }
-        ],
-        model: MODEL_NAME,
-        temperature: 0.1,
-        max_tokens: 4096,
-        response_format: { type: "json_object" }
-      });
-      return completion.choices[0]?.message?.content || "{}"
+      const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+      const result = await model.generateContent(prompt)
+      return result.response.text()
     }
 
-    // Execute with retries
     const text = await retryWithBackoff(callApi)
-
-    // Extract and parse JSON
     const explanationResult = extractJsonFromResponse(text) as AlgorithmExplanationResult
-
-    // Cache the result
     setCachedResult(cacheKey, explanationResult)
-
     return explanationResult
+
   } catch (error) {
-    console.error("Algorithm explanation error:", error instanceof Error ? error.message : String(error))
+    console.error("Algorithm explanation error:", error)
     return algorithmFallback(algorithm)
   }
 }

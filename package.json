@@ -56,7 +56,6 @@
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "monaco-editor": "latest",
-    "groq-sdk": "^0.3.3",
     "next": "15.1.0",
     "next-themes": "latest",
     "react": "^19",

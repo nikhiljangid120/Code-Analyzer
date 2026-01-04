@@ -33,7 +33,7 @@ const safetySettings = [
 // Centralized model configuration
 const getModel = (outputTokens = 4096, temp = 0.2) => {
   return genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-1.5-flash",
     safetySettings,
     generationConfig: {
       temperature: temp,

@@ -7,7 +7,7 @@ const API_KEY = process.env.GEMINI_API_KEY
 if (!API_KEY) {
   throw new Error("Missing GEMINI_API_KEY environment variable")
 }
-}
+
 
 const genAI = new GoogleGenerativeAI(API_KEY)
 // Centralized safety settings

@@ -11,7 +11,7 @@ if (!API_KEY) {
 const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null
 
 // Model configuration
-const MODEL_NAME = "gemini-1.5-flash"
+const MODEL_NAME = "gemini-2.0-flash"
 
 // Helper function to extract and parse JSON from AI responses
 function extractJsonFromResponse(text: string) {

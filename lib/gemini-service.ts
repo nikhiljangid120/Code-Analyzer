@@ -1,11 +1,19 @@
 "use server"
 
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai"
+import { z } from "zod" // For input validation
+import fs from "fs"
+import path from "path"
 
 // Initialize the Google Generative AI with the API key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+const API_KEY = process.env.GEMINI_API_KEY
+if (!API_KEY) {
+  throw new Error("Missing GEMINI_API_KEY environment variable")
+}
 
-// Configure safety settings
+const genAI = new GoogleGenerativeAI(API_KEY)
+
+// Centralized safety settings
 const safetySettings = [
   {
     category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -25,6 +33,43 @@ const safetySettings = [
   },
 ]
 
+// Centralized model configuration
+const getModel = (outputTokens = 4096, temp = 0.2) => {
+  return genAI.getGenerativeModel({
+    model: "gemini-1.5-pro",
+    safetySettings,
+    generationConfig: {
+      temperature: temp,
+      topP: 0.8,
+      topK: 40,
+      maxOutputTokens: outputTokens,
+    },
+  })
+}
+
+// Helper function to extract and parse JSON from AI responses
+function extractJsonFromResponse(text: string) {
+  // Try multiple patterns to extract JSON
+  const jsonMatch =
+    text.match(/```json\s*([\s\S]*?)\s*```/) || // Match code blocks
+    text.match(/{[\s\S]*}/) ||                  // Match bare JSON
+    text.match(/\{[\s\S]*?\}/g)                 // Last resort looser matching
+
+  if (!jsonMatch) {
+    throw new Error("Could not extract JSON from response")
+  }
+
+  const jsonString = jsonMatch[1] || jsonMatch[0]
+
+  try {
+    return JSON.parse(jsonString.replace(/^```json|```$/g, "").trim())
+  } catch (parseError) {
+    console.error("JSON parse error:", parseError)
+    throw new Error("Failed to parse response data")
+  }
+}
+
+// Types
 export interface CodeAnalysisResult {
   summary: string
   complexity: {
@@ -47,107 +92,6 @@ export interface CodeAnalysisResult {
   }[]
 }
 
-export async function analyzeCode(code: string, language: string): Promise<CodeAnalysisResult> {
-  try {
-    // Get the generative model
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-pro",
-      safetySettings,
-      generationConfig: {
-        temperature: 0.2,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 8192,
-      },
-    })
-
-    // Prepare the prompt for code analysis
-    const prompt = `
-      You are an expert code analyzer and software engineer. Analyze the following ${language} code thoroughly:
-      
-      \`\`\`${language}
-      ${code}
-      \`\`\`
-      
-      Provide a detailed analysis including:
-      1. A comprehensive summary of what the code does
-      2. Detailed time and space complexity analysis with Big O notation and explanation
-      3. Specific suggestions for optimization with examples
-      4. Best practices that could be applied to improve the code
-      5. Potential issues, bugs, or edge cases
-      6. Security concerns or vulnerabilities if applicable
-      7. Provide scores from 1-10 for readability, performance, maintainability, and security
-      8. Calculate an overall score from 1-10 based on the above metrics
-      9. Provide 1-3 code snippets showing how specific parts could be improved, with explanations
-      
-      Format your response as JSON with the following structure:
-      {
-        "summary": "Detailed description of the code",
-        "complexity": {
-          "time": "Time complexity with explanation",
-          "space": "Space complexity with explanation"
-        },
-        "suggestions": ["Suggestion 1", "Suggestion 2", ...],
-        "bestPractices": ["Best practice 1", "Best practice 2", ...],
-        "potentialIssues": ["Issue 1", "Issue 2", ...],
-        "securityConcerns": ["Security concern 1", "Security concern 2", ...],
-        "readabilityScore": 7,
-        "performanceScore": 6,
-        "maintainabilityScore": 8,
-        "securityScore": 5,
-        "overallScore": 6.5,
-        "codeSnippets": [
-          {
-            "original": "Original code snippet",
-            "improved": "Improved code snippet",
-            "explanation": "Explanation of improvements"
-          }
-        ]
-      }
-      
-      Ensure your analysis is thorough, accurate, and helpful for improving the code.
-    `
-
-    // Generate content
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text()
-
-    // Extract JSON from the response
-    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/{[\s\S]*}/)
-    const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text
-
-    try {
-      // Parse the JSON response
-      const analysisResult = JSON.parse(jsonString.replace(/^```json|```$/g, "").trim())
-      return analysisResult as CodeAnalysisResult
-    } catch (parseError) {
-      console.error("Error parsing JSON response:", parseError)
-      // Fallback response if JSON parsing fails
-      return {
-        summary: "Unable to parse analysis results. The AI response was not in the expected format.",
-        complexity: {
-          time: "Unknown",
-          space: "Unknown",
-        },
-        suggestions: ["Error analyzing code"],
-        bestPractices: [],
-        potentialIssues: [],
-        securityConcerns: [],
-        readabilityScore: 0,
-        performanceScore: 0,
-        maintainabilityScore: 0,
-        securityScore: 0,
-        overallScore: 0,
-        codeSnippets: [],
-      }
-    }
-  } catch (error) {
-    console.error("Error analyzing code:", error)
-    throw new Error("Failed to analyze code. Please try again later.")
-  }
-}
-
 export interface AlgorithmExplanationResult {
   name: string
   description: string
@@ -164,79 +108,223 @@ export interface AlgorithmExplanationResult {
   visualizationSteps: string[]
 }
 
-export async function getAlgorithmExplanation(algorithm: string): Promise<AlgorithmExplanationResult> {
-  try {
-    // Get the generative model
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-pro",
-      safetySettings,
-      generationConfig: {
-        temperature: 0.2,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 4096,
-      },
-    })
+// Input validators
+const codeAnalysisSchema = z.object({
+  code: z.string().min(1, "Code is required"),
+  language: z.string().min(1, "Language is required"),
+})
 
-    // Prepare the prompt for algorithm explanation
-    const prompt = `
-      You are an expert computer scientist specializing in algorithms and data structures. Provide a detailed explanation of the ${algorithm} algorithm.
-      
-      Format your response as JSON with the following structure:
-      {
-        "name": "Full name of the algorithm",
-        "description": "Detailed description of how the algorithm works",
-        "timeComplexity": {
-          "best": "Best case time complexity with explanation",
-          "average": "Average case time complexity with explanation",
-          "worst": "Worst case time complexity with explanation"
-        },
-        "spaceComplexity": "Space complexity with explanation",
-        "pseudocode": "Pseudocode representation of the algorithm",
-        "advantages": ["Advantage 1", "Advantage 2", ...],
-        "disadvantages": ["Disadvantage 1", "Disadvantage 2", ...],
-        "useCases": ["Use case 1", "Use case 2", ...],
-        "visualizationSteps": ["Step 1 description", "Step 2 description", ...]
-      }
-      
-      Ensure your explanation is thorough, accurate, and educational.
-    `
+const algorithmSchema = z.object({
+  algorithm: z.string().min(1, "Algorithm name is required"),
+})
 
-    // Generate content
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text()
+// Fallback responses
+const codeAnalysisFallback: CodeAnalysisResult = {
+  summary: "Analysis could not be completed",
+  complexity: {
+    time: "Unknown",
+    space: "Unknown",
+  },
+  suggestions: ["Try again with a different code sample"],
+  bestPractices: [],
+  potentialIssues: [],
+  securityConcerns: [],
+  readabilityScore: 0,
+  performanceScore: 0,
+  maintainabilityScore: 0,
+  securityScore: 0,
+  overallScore: 0,
+  codeSnippets: [],
+}
 
-    // Extract JSON from the response
-    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/{[\s\S]*}/)
-    const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text
+const algorithmFallback = (algorithm: string): AlgorithmExplanationResult => ({
+  name: algorithm,
+  description: "Explanation could not be generated",
+  timeComplexity: {
+    best: "Unknown",
+    average: "Unknown",
+    worst: "Unknown",
+  },
+  spaceComplexity: "Unknown",
+  pseudocode: "Could not generate pseudocode",
+  advantages: [],
+  disadvantages: [],
+  useCases: [],
+  visualizationSteps: [],
+})
 
-    try {
-      // Parse the JSON response
-      const explanationResult = JSON.parse(jsonString.replace(/^```json|```$/g, "").trim())
-      return explanationResult as AlgorithmExplanationResult
-    } catch (parseError) {
-      console.error("Error parsing JSON response:", parseError)
-      // Fallback response if JSON parsing fails
-      return {
-        name: algorithm,
-        description: "Unable to parse explanation results",
-        timeComplexity: {
-          best: "Unknown",
-          average: "Unknown",
-          worst: "Unknown",
-        },
-        spaceComplexity: "Unknown",
-        pseudocode: "Unable to generate pseudocode",
-        advantages: [],
-        disadvantages: [],
-        useCases: [],
-        visualizationSteps: [],
-      }
+// Rate limiting logic
+const requestCache = new Map<string, { timestamp: number, data: any }>()
+const RATE_LIMIT_MS = 10000 // 10 seconds
+
+function getRateLimitedCachedResult<T>(cacheKey: string, fallback: T): T | null {
+  const cached = requestCache.get(cacheKey)
+
+  if (cached) {
+    const now = Date.now()
+    if (now - cached.timestamp < RATE_LIMIT_MS) {
+      return cached.data as T
     }
-  } catch (error) {
-    console.error("Error getting algorithm explanation:", error)
-    throw new Error("Failed to get algorithm explanation. Please try again later.")
+  }
+
+  return null
+}
+
+function setCachedResult(cacheKey: string, data: any): void {
+  requestCache.set(cacheKey, {
+    timestamp: Date.now(),
+    data
+  })
+
+  // Clean old cache entries
+  if (requestCache.size > 100) {
+    const now = Date.now()
+    requestCache.forEach((value, key) => {
+      if (now - value.timestamp > 3600000) { // 1 hour
+        requestCache.delete(key)
+      }
+    })
   }
 }
 
+/**
+ * Analyzes code and provides detailed feedback on quality, performance, and security
+ */
+export async function analyzeCode(code: string, language: string): Promise<CodeAnalysisResult> {
+  try {
+    // Validate inputs
+    const parsedInput = codeAnalysisSchema.safeParse({ code, language })
+    if (!parsedInput.success) {
+      console.warn("Input validation failed:", parsedInput.error)
+      return codeAnalysisFallback
+    }
+
+    // Check rate limit/cache
+    const cacheKey = `code:${code.substring(0, 100)}:${language}`
+    const cached = getRateLimitedCachedResult(cacheKey, codeAnalysisFallback)
+    if (cached) return cached
+
+    // Prepare the prompt with more professional, non-AI language
+    const prompt = `
+      Analyze the following ${language} code as a senior engineering professional would:
+      
+      \`\`\`${language}
+      ${code}
+      \`\`\`
+      
+      Provide a technical analysis with:
+      1. A technical summary of functionality
+      2. Time and space complexity analysis with Big O notation
+      3. Specific optimization recommendations with examples
+      4. Industry best practices that would improve the code
+      5. Potential bugs, edge cases and issues
+      6. Security vulnerabilities or concerns
+      7. Technical scores (1-10) for: readability, performance, maintainability, security
+      8. Overall quality score (1-10)
+      9. 1-3 code snippets showing specific improvements with technical justification
+      
+      Format as JSON with this structure:
+      {
+        "summary": "Technical description of the code",
+        "complexity": {
+          "time": "Time complexity with explanation",
+          "space": "Space complexity with explanation"
+        },
+        "suggestions": ["Suggestion 1", "Suggestion 2"...],
+        "bestPractices": ["Best practice 1", "Best practice 2"...],
+        "potentialIssues": ["Issue 1", "Issue 2"...],
+        "securityConcerns": ["Security concern 1", "Security concern 2"...],
+        "readabilityScore": 7,
+        "performanceScore": 6,
+        "maintainabilityScore": 8,
+        "securityScore": 5,
+        "overallScore": 6.5,
+        "codeSnippets": [
+          {
+            "original": "Original code snippet",
+            "improved": "Improved code snippet",
+            "explanation": "Technical justification for improvements"
+          }
+        ]
+      }
+    `
+
+    // Get model with larger token limit for code analysis
+    const model = getModel(8192, 0.1) // Lower temperature for more precise results
+
+    // Generate content with timeout
+    const resultPromise = model.generateContent(prompt)
+    const timeoutPromise = new Promise<null>((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out")), 30000) // 30 second timeout
+    )
+
+    const result = await Promise.race([resultPromise, timeoutPromise])
+    if (!result) throw new Error("Request timed out")
+
+    const response = await result.response
+    const text = response.text()
+
+    // Extract and parse JSON
+    try {
+      // Validate input
+      const parsedInput = algorithmSchema.safeParse({ algorithm })
+      if (!parsedInput.success) {
+        console.warn("Input validation failed:", parsedInput.error)
+        return algorithmFallback(algorithm)
+      }
+
+      // Check rate limit/cache
+      const cacheKey = `algorithm:${algorithm.toLowerCase()}`
+      const cached = getRateLimitedCachedResult(cacheKey, algorithmFallback(algorithm))
+      if (cached) return cached
+
+      // Prepare prompt with more professional language
+      const prompt = `
+      Provide a technical explanation of the ${algorithm} algorithm from a computer science perspective.
+      
+      Format as JSON with this structure:
+      {
+        "name": "Full name of the algorithm",
+        "description": "Technical description of how the algorithm works",
+        "timeComplexity": {
+          "best": "Best case time complexity with mathematical justification",
+          "average": "Average case time complexity with mathematical justification",
+          "worst": "Worst case time complexity with mathematical justification"
+        },
+        "spaceComplexity": "Space complexity with mathematical justification",
+        "pseudocode": "Pseudocode representation following standard conventions",
+        "advantages": ["Technical advantage 1", "Technical advantage 2"...],
+        "disadvantages": ["Technical limitation 1", "Technical limitation 2"...],
+        "useCases": ["Application 1", "Application 2"...],
+        "visualizationSteps": ["Step 1 with technical details", "Step 2 with technical details"...]
+      }
+      
+      Focus on technical correctness and precision.
+    `
+
+      const model = getModel(4096, 0.1) // Lower temperature for factual accuracy
+
+      // Generate with timeout
+      const resultPromise = model.generateContent(prompt)
+      const timeoutPromise = new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error("Request timed out")), 20000) // 20 second timeout
+      )
+
+      const result = await Promise.race([resultPromise, timeoutPromise])
+      if (!result) throw new Error("Request timed out")
+
+      const response = await result.response
+      const text = response.text()
+
+      // Extract and parse JSON
+      const explanationResult = extractJsonFromResponse(text) as AlgorithmExplanationResult
+
+      // Cache the result
+      setCachedResult(cacheKey, explanationResult)
+
+      return explanationResult
+    } catch (error) {
+      console.error("Algorithm explanation error:", error instanceof Error ? error.message : String(error))
+      return algorithmFallback(algorithm)
+    }
+  }

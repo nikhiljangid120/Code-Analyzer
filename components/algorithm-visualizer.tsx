@@ -929,4 +929,3 @@ function generateShellSortSteps(data: BarData[]): {
 
   return { steps, comparisons, swaps }
 }
-

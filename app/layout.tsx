@@ -17,7 +17,6 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "CodeViz | Advanced Code Analyzer & Algorithm Visualizer",
   description: "Analyze code, visualize algorithms, and get AI-powered insights with stunning visualizations",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({

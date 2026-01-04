@@ -1,25 +1,15 @@
 "use server"
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai"
 import { z } from "zod" // For input validation
-<<<<<<< HEAD
-import fs from "fs"
-import path from "path"
-=======
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
 
 // Initialize the Google Generative AI with the API key
 const API_KEY = process.env.GEMINI_API_KEY
 if (!API_KEY) {
   throw new Error("Missing GEMINI_API_KEY environment variable")
 }
-<<<<<<< HEAD
+}
 
 const genAI = new GoogleGenerativeAI(API_KEY)
-
-=======
-const genAI = new GoogleGenerativeAI(API_KEY)
-
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
 // Centralized safety settings
 const safetySettings = [
   {
@@ -57,7 +47,6 @@ const getModel = (outputTokens = 4096, temp = 0.2) => {
 // Helper function to extract and parse JSON from AI responses
 function extractJsonFromResponse(text: string) {
   // Try multiple patterns to extract JSON
-<<<<<<< HEAD
   const jsonMatch =
     text.match(/```json\s*([\s\S]*?)\s*```/) || // Match code blocks
     text.match(/{[\s\S]*}/) ||                  // Match bare JSON
@@ -68,20 +57,6 @@ function extractJsonFromResponse(text: string) {
   }
 
   const jsonString = jsonMatch[1] || jsonMatch[0]
-
-=======
-  const jsonMatch = 
-    text.match(/```json\s*([\s\S]*?)\s*```/) || // Match code blocks
-    text.match(/{[\s\S]*}/) ||                  // Match bare JSON
-    text.match(/\{[\s\S]*?\}/g)                 // Last resort looser matching
-    
-  if (!jsonMatch) {
-    throw new Error("Could not extract JSON from response")
-  }
-  
-  const jsonString = jsonMatch[1] || jsonMatch[0]
-  
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
   try {
     return JSON.parse(jsonString.replace(/^```json|```$/g, "").trim())
   } catch (parseError) {
@@ -180,22 +155,14 @@ const RATE_LIMIT_MS = 10000 // 10 seconds
 
 function getRateLimitedCachedResult<T>(cacheKey: string, fallback: T): T | null {
   const cached = requestCache.get(cacheKey)
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
   if (cached) {
     const now = Date.now()
     if (now - cached.timestamp < RATE_LIMIT_MS) {
       return cached.data as T
     }
   }
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
   return null
 }
 
@@ -204,11 +171,7 @@ function setCachedResult(cacheKey: string, data: any): void {
     timestamp: Date.now(),
     data
   })
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
   // Clean old cache entries
   if (requestCache.size > 100) {
     const now = Date.now()
@@ -231,11 +194,7 @@ export async function analyzeCode(code: string, language: string): Promise<CodeA
       console.warn("Input validation failed:", parsedInput.error)
       return codeAnalysisFallback
     }
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
     // Check rate limit/cache
     const cacheKey = `code:${code.substring(0, 100)}:${language}`
     const cached = getRateLimitedCachedResult(cacheKey, codeAnalysisFallback)
@@ -285,8 +244,6 @@ export async function analyzeCode(code: string, language: string): Promise<CodeA
         ]
       }
     `
-<<<<<<< HEAD
-
     // Get model with larger token limit for code analysis
     const model = getModel(8192, 0.1) // Lower temperature for more precise results
 
@@ -305,29 +262,7 @@ export async function analyzeCode(code: string, language: string): Promise<CodeA
     // Extract and parse JSON
     const analysisResult = extractJsonFromResponse(text) as CodeAnalysisResult
     setCachedResult(cacheKey, analysisResult)
-=======
-    // Get model with larger token limit for code analysis
-    const model = getModel(8192, 0.1) // Lower temperature for more precise results
-    
-    // Generate content with timeout
-    const resultPromise = model.generateContent(prompt)
-    const timeoutPromise = new Promise<null>((_, reject) => 
-      setTimeout(() => reject(new Error("Request timed out")), 30000) // 30 second timeout
-    )
-    
-    const result = await Promise.race([resultPromise, timeoutPromise])
-    if (!result) throw new Error("Request timed out")
-    
-    const response = await result.response
-    const text = response.text()
-    
-    // Extract and parse JSON
-    const analysisResult = extractJsonFromResponse(text) as CodeAnalysisResult
-    
-    // Cache the result
-    setCachedResult(cacheKey, analysisResult)
-    
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
+
     return analysisResult
   } catch (error) {
     console.error("Code analysis error:", error instanceof Error ? error.message : String(error))
@@ -336,15 +271,9 @@ export async function analyzeCode(code: string, language: string): Promise<CodeA
 }
 
 /**
-<<<<<<< HEAD
- * Explains an algorithm and provides detailed feedback
- */
-export async function explainAlgorithm(algorithm: string): Promise<AlgorithmExplanationResult> {
-=======
  * Provides in-depth explanation of algorithms with complexity analysis and examples
  */
 export async function getAlgorithmExplanation(algorithm: string): Promise<AlgorithmExplanationResult> {
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
   try {
     // Validate input
     const parsedInput = algorithmSchema.safeParse({ algorithm })
@@ -352,11 +281,7 @@ export async function getAlgorithmExplanation(algorithm: string): Promise<Algori
       console.warn("Input validation failed:", parsedInput.error)
       return algorithmFallback(algorithm)
     }
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
     // Check rate limit/cache
     const cacheKey = `algorithm:${algorithm.toLowerCase()}`
     const cached = getRateLimitedCachedResult(cacheKey, algorithmFallback(algorithm))
@@ -387,7 +312,6 @@ export async function getAlgorithmExplanation(algorithm: string): Promise<Algori
     `
 
     const model = getModel(4096, 0.1) // Lower temperature for factual accuracy
-<<<<<<< HEAD
 
     // Generate with timeout
     const resultPromise = model.generateContent(prompt)
@@ -407,34 +331,9 @@ export async function getAlgorithmExplanation(algorithm: string): Promise<Algori
     // Cache the result
     setCachedResult(cacheKey, explanationResult)
 
-=======
-    
-    // Generate with timeout
-    const resultPromise = model.generateContent(prompt)
-    const timeoutPromise = new Promise<null>((_, reject) => 
-      setTimeout(() => reject(new Error("Request timed out")), 20000) // 20 second timeout
-    )
-    
-    const result = await Promise.race([resultPromise, timeoutPromise])
-    if (!result) throw new Error("Request timed out")
-    
-    const response = await result.response
-    const text = response.text()
-    
-    // Extract and parse JSON
-    const explanationResult = extractJsonFromResponse(text) as AlgorithmExplanationResult
-    
-    // Cache the result
-    setCachedResult(cacheKey, explanationResult)
-    
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08
     return explanationResult
   } catch (error) {
     console.error("Algorithm explanation error:", error instanceof Error ? error.message : String(error))
     return algorithmFallback(algorithm)
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 49e3984dc98f480f04ac65260024de8031c37c08

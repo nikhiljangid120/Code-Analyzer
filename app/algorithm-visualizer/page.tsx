@@ -77,7 +77,7 @@ export default function AlgorithmVisualizerPage() {
   }
 
   const handleDataStructureChange = (value: string) => {
-    setDataStructure(value)
+    setDataStructure(value as DataStructure)
   }
 
   const handleArraySizeChange = (value: number[]) => {
@@ -480,7 +480,6 @@ export default function AlgorithmVisualizerPage() {
           >
             <DataStructureVisualizer
               dataStructure={dataStructure}
-              data={data}
               is3D={is3D}
               colorMode={colorMode}
               height={visualizerHeight}

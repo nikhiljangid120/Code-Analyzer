@@ -1506,7 +1506,7 @@ export default function DataStructureVisualizer({
     nodes: Node[],
     nodeId: string | undefined,
     position: [number, number, number],
-  ): JSX.Element | null => {
+  ): React.JSX.Element | null => {
     if (!nodeId) return null
     const node = nodes.find((n) => n.id === nodeId)
     if (!node) return null

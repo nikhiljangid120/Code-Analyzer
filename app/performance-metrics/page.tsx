@@ -462,7 +462,7 @@ export default function PerformanceMetricsPage() {
   const [chartType, setChartType] = useState("line")
   const [dataSeed, setDataSeed] = useState(Math.random())
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [chartHeight, setChartHeight] = useState(400)
+  const [chartHeight, setChartHeight] = useState(600)
   const [categoryFilter, setCategoryFilter] = useState("Sorting")
   const [isLoading, setIsLoading] = useState(false)
 
@@ -836,7 +836,7 @@ export default function PerformanceMetricsPage() {
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       {chartType === "area" ? (
-                        <AreaChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                        <AreaChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -855,7 +855,7 @@ export default function PerformanceMetricsPage() {
                           )}
                         </AreaChart>
                       ) : chartType === "line" ? (
-                        <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                        <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -874,7 +874,7 @@ export default function PerformanceMetricsPage() {
                           )}
                         </LineChart>
                       ) : (
-                        <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                        <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -938,7 +938,7 @@ export default function PerformanceMetricsPage() {
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       {chartType === "area" ? (
-                        <AreaChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                        <AreaChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Memory (MB)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -947,7 +947,7 @@ export default function PerformanceMetricsPage() {
                           <Area type="monotone" dataKey="memory" stroke="var(--color-memory)" fill="var(--color-memory)" fillOpacity={0.3} name="Memory Usage (MB)" isAnimationActive={animateCharts} />
                         </AreaChart>
                       ) : chartType === "line" ? (
-                        <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                        <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Memory (MB)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -956,7 +956,7 @@ export default function PerformanceMetricsPage() {
                           <Line type="monotone" dataKey="memory" stroke="var(--color-memory)" name="Memory Usage (MB)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} isAnimationActive={animateCharts} />
                         </LineChart>
                       ) : (
-                        <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                        <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Memory (MB)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -1010,7 +1010,7 @@ export default function PerformanceMetricsPage() {
                     ]))}
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                      <LineChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
                         <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                         <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -20 }} tick={{ fontSize: 12 }} />
                         <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />

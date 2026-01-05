@@ -193,6 +193,7 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
     let operations = 0
     let efficiency = 0
     const seed = dataSeed * size
+    const randomVariation = Math.random() * 0.1 + 0.95 // 0.95 to 1.05 multiplier
 
     switch (algorithm) {
       case "bubble":

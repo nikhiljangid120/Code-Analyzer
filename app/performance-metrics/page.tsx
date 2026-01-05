@@ -478,7 +478,7 @@ export default function PerformanceMetricsPage() {
       } else if (width < 1024) {
         setChartHeight(400)
       } else {
-        setChartHeight(isFullscreen ? 600 : 500)
+        setChartHeight(isFullscreen ? 700 : 600)
       }
     }
     handleResize()
@@ -834,7 +834,7 @@ export default function PerformanceMetricsPage() {
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       {chartType === "area" ? (
-                        <AreaChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <AreaChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -853,7 +853,7 @@ export default function PerformanceMetricsPage() {
                           )}
                         </AreaChart>
                       ) : chartType === "line" ? (
-                        <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -872,7 +872,7 @@ export default function PerformanceMetricsPage() {
                           )}
                         </LineChart>
                       ) : (
-                        <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -936,7 +936,7 @@ export default function PerformanceMetricsPage() {
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       {chartType === "area" ? (
-                        <AreaChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <AreaChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Memory (MB)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -945,7 +945,7 @@ export default function PerformanceMetricsPage() {
                           <Area type="monotone" dataKey="memory" stroke="var(--color-memory)" fill="var(--color-memory)" fillOpacity={0.3} name="Memory Usage (MB)" isAnimationActive={animateCharts} />
                         </AreaChart>
                       ) : chartType === "line" ? (
-                        <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Memory (MB)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -954,7 +954,7 @@ export default function PerformanceMetricsPage() {
                           <Line type="monotone" dataKey="memory" stroke="var(--color-memory)" name="Memory Usage (MB)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} isAnimationActive={animateCharts} />
                         </LineChart>
                       ) : (
-                        <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                        <BarChart data={performanceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Memory (MB)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -1008,16 +1008,16 @@ export default function PerformanceMetricsPage() {
                     ]))}
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }} barGap={2} barCategoryGap="10%">
+                      <LineChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                         <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
-                        <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
+                        <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -20 }} tick={{ fontSize: 12 }} />
                         <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend verticalAlign="top" height={60} wrapperStyle={{ fontSize: 12, overflow: 'auto', maxHeight: '60px' }} />
+                        <Legend verticalAlign="top" height={80} wrapperStyle={{ fontSize: 12, overflow: 'auto', maxHeight: '80px', paddingBottom: '20px' }} />
                         {filteredAlgorithms.map((opt) => (
-                          <Bar key={opt.id} dataKey={opt.id} fill={`var(--color-${opt.id})`} name={opt.name} isAnimationActive={animateCharts} />
+                          <Line key={opt.id} type="monotone" dataKey={opt.id} stroke={`var(--color-${opt.id})`} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} name={opt.name} isAnimationActive={animateCharts} />
                         ))}
-                      </BarChart>
+                      </LineChart>
                     </ResponsiveContainer>
                   </ChartContainer>
                 )}

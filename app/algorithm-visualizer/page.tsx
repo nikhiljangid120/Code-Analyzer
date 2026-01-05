@@ -147,7 +147,7 @@ export default function AlgorithmVisualizerPage() {
         transition={{ duration: 0.5 }}
         className="flex flex-col space-y-2"
       >
-        <h1 className="text-4xl font-bold tracking-tight font-heading">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-heading">
           <span className="text-primary glow-text">Interactive</span> Algorithm Visualizer
         </h1>
         <p className="text-muted-foreground text-lg">
@@ -156,12 +156,12 @@ export default function AlgorithmVisualizerPage() {
       </motion.div>
 
       <Tabs defaultValue="sorting" className="w-full">
-        <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
-          <TabsTrigger value="sorting" className="flex items-center gap-2">
+        <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto h-auto">
+          <TabsTrigger value="sorting" className="flex flex-col sm:flex-row items-center gap-2 py-2">
             <BarChart2 className="h-4 w-4" />
             <span>Sorting Algorithms</span>
           </TabsTrigger>
-          <TabsTrigger value="dataStructures" className="flex items-center gap-2">
+          <TabsTrigger value="dataStructures" className="flex flex-col sm:flex-row items-center gap-2 py-2">
             <Database className="h-4 w-4" />
             <span>Data Structures</span>
           </TabsTrigger>
@@ -243,24 +243,24 @@ export default function AlgorithmVisualizerPage() {
 
                   <div className="space-y-2">
                     <Label>Custom Input</Label>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       <Input
                         placeholder="e.g., 5, 3, 8, 1, 2"
                         value={customInput}
                         onChange={handleCustomInputChange}
                         className="bg-background/60"
                       />
-                      <Button variant="outline" size="icon" onClick={handleCustomInputSubmit}>
+                      <Button variant="outline" size="icon" onClick={handleCustomInputSubmit} className="w-full sm:w-auto">
                         <Play className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                       <Label>Visualization Style</Label>
                       <Select value={colorMode} onValueChange={handleColorModeChange}>
-                        <SelectTrigger className="w-[140px] bg-background/60">
+                        <SelectTrigger className="w-full sm:w-[140px] bg-background/60">
                           <SelectValue placeholder="Color Mode" />
                         </SelectTrigger>
                         <SelectContent>

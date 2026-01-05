@@ -308,57 +308,57 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
   })
 }
 
-const generateComparisonData = (maxSize, dataSeed = Math.random()) => {
-  const sizes = [10, 50, 100, 200, 500, maxSize]
-  return sizes.map((size) => {
-    const seed = dataSeed * size
-    const data = { size }
-    algorithmOptions.forEach((algo) => {
-      let time = 0
-      switch (algo.id) {
-        case "bubble":
-        case "insertion":
-        case "selection":
-          time = size * size * 0.01 + Math.sin(seed) * 5
-          break
-        case "quick":
-        case "merge":
-          time = size * Math.log2(size) * 0.05 + Math.sin(seed) * 3
-          break
-        case "binary":
-          time = Math.log2(size) * 0.02 + Math.sin(seed) * 1
-          break
-        case "bfs":
-        case "dfs":
-          time = size * 0.05 + Math.sin(seed) * 2
-          break
-        case "dijkstra":
-          time = (size + size * Math.log2(size)) * 0.04 + Math.sin(seed) * 3
-          break
-        case "floyd":
-          time = size * size * size * 0.001 + Math.sin(seed) * 5
-          break
-        case "kmp":
-        case "boyer":
-          time = size * 0.03 + Math.sin(seed) * 1
-          break
-        case "greedy":
-          time = size * 0.04 + Math.sin(seed) * 2
-          break
-        case "kadane":
-        case "slowfast":
-          time = size * 0.01 + Math.sin(seed) * 1
-          break
-        case "recursive":
-          time = size * Math.log2(size) * 0.05 + Math.sin(seed) * 2
-          break
-        default:
-          time = size * 0.05
-      }
-      data[algo.id] = Math.max(0.1, time.toFixed(2))
-    })
-    return data
+const sizes = [10, 50, 100, 200, 500, maxSize].filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b)
+return sizes.map((size) => {
+  const randomVariation = Math.random() * 0.2 + 0.9 // 0.9 to 1.1 multiplier
+  const data = { size }
+  algorithmOptions.forEach((algo) => {
+    let time = 0
+    switch (algo.id) {
+      case "bubble":
+      case "insertion":
+      case "selection":
+        time = size * size * 0.005 * randomVariation
+        break
+      case "quick":
+      case "merge":
+        time = size * Math.log2(size) * 0.1 * randomVariation
+        break
+      case "binary":
+        time = Math.log2(size) * 0.5 * randomVariation
+        break
+      case "bfs":
+      case "dfs":
+        time = size * 0.1 * randomVariation
+        break
+      case "dijkstra":
+        time = (size + size * Math.log2(size)) * 0.08 * randomVariation
+        break
+      case "floyd":
+        // Toned down constant to prevent chart breakage while preserving O(n^3) shape
+        time = size * size * size * 0.00005 * randomVariation
+        break
+      case "kmp":
+      case "boyer":
+        time = size * 0.05 * randomVariation
+        break
+      case "greedy":
+        time = size * 0.06 * randomVariation
+        break
+      case "kadane":
+      case "slowfast":
+        time = size * 0.02 * randomVariation
+        break
+      case "recursive":
+        time = size * Math.log2(size) * 0.08 * randomVariation
+        break
+      default:
+        time = size * 0.05
+    }
+    data[algo.id] = Math.max(0.1, Number(time.toFixed(2)))
   })
+  return data
+})
 }
 
 const generateTheoreticalData = (maxSize) => {
@@ -461,7 +461,7 @@ export default function PerformanceMetricsPage() {
   const [dataSeed, setDataSeed] = useState(Math.random())
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [chartHeight, setChartHeight] = useState(400)
-  const [categoryFilter, setCategoryFilter] = useState("All")
+  const [categoryFilter, setCategoryFilter] = useState("Sorting")
   const [isLoading, setIsLoading] = useState(false)
 
   const [performanceData, setPerformanceData] = useState(() => generatePerformanceData("quick", 200, dataSeed))

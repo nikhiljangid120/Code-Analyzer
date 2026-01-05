@@ -316,7 +316,7 @@ export default function AlgorithmVisualizer({
               </div>
 
               <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 flex-wrap gap-y-2">
                   <div className="flex items-center">
                     <div className="w-3 h-3 rounded-full bg-primary mr-1"></div>
                     <span>Default</span>

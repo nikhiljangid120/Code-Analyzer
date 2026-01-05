@@ -1,36 +1,13 @@
 "use server"
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import { z } from "zod"
 
-// Initialize the Gemini client
-const API_KEY = process.env.GEMINI_API_KEY
-if (!API_KEY) {
-  console.warn("Missing GEMINI_API_KEY environment variable. AI features will use fallback.")
-}
+// Groq API Configuration
+const GROQ_API_KEY = process.env.GROQ_API_KEY
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+const MODEL_NAME = "llama-3.3-70b-versatile"
 
-const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null
-
-// Model configuration
-const MODEL_NAME = "gemini-2.0-flash"
-
-// Helper function to extract and parse JSON from AI responses
-function extractJsonFromResponse(text: string) {
-  const jsonMatch =
-    text.match(/```json\s*([\s\S]*?)\s*```/) ||
-    text.match(/\{[\s\S]*\}/) ||
-    text.match(/\{[\s\S]*?\}/g)
-
-  if (!jsonMatch) {
-    throw new Error("Could not extract JSON from response")
-  }
-
-  const jsonString = jsonMatch[1] || jsonMatch[0]
-  try {
-    return JSON.parse(jsonString.replace(/^```json|```$/g, "").trim())
-  } catch (parseError) {
-    console.error("JSON parse error:", parseError)
-    throw new Error("Failed to parse response data")
-  }
+if (!GROQ_API_KEY) {
+  console.warn("Missing GROQ_API_KEY environment variable. AI features will use fallback.")
 }
 
 // Types
@@ -82,6 +59,54 @@ const algorithmSchema = z.object({
   algorithm: z.string().min(1, "Algorithm name is required"),
 })
 
+// Helper function to call Groq API
+async function callGroqAPI(messages: { role: string; content: string }[]): Promise<string> {
+  if (!GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY not configured")
+  }
+
+  const response = await fetch(GROQ_API_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${GROQ_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: MODEL_NAME,
+      messages,
+      temperature: 0.1,
+      max_tokens: 4096,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Groq API error: ${response.status} - ${error}`)
+  }
+
+  const data = await response.json()
+  return data.choices[0]?.message?.content || ""
+}
+
+// Helper function to extract and parse JSON from AI responses
+function extractJsonFromResponse(text: string) {
+  const jsonMatch =
+    text.match(/```json\s*([\s\S]*?)\s*```/) ||
+    text.match(/\{[\s\S]*\}/)
+
+  if (!jsonMatch) {
+    throw new Error("Could not extract JSON from response")
+  }
+
+  const jsonString = jsonMatch[1] || jsonMatch[0]
+  try {
+    return JSON.parse(jsonString.replace(/^```json|```$/g, "").trim())
+  } catch (parseError) {
+    console.error("JSON parse error:", parseError)
+    throw new Error("Failed to parse response data")
+  }
+}
+
 // Fallback responses
 const codeAnalysisFallback: CodeAnalysisResult = {
   summary: "Analysis could not be completed",
@@ -109,47 +134,6 @@ const algorithmFallback = (algorithm: string): AlgorithmExplanationResult => ({
   useCases: [],
   visualizationSteps: [],
 })
-
-// Rate limiting and caching
-const requestCache = new Map<string, { timestamp: number, data: any }>()
-const RATE_LIMIT_MS = 60000
-
-function getRateLimitedCachedResult<T>(cacheKey: string): T | null {
-  const cached = requestCache.get(cacheKey)
-  if (cached && Date.now() - cached.timestamp < RATE_LIMIT_MS) {
-    return cached.data as T
-  }
-  return null
-}
-
-function setCachedResult(cacheKey: string, data: any): void {
-  requestCache.set(cacheKey, { timestamp: Date.now(), data })
-  if (requestCache.size > 100) {
-    const now = Date.now()
-    requestCache.forEach((value, key) => {
-      if (now - value.timestamp > 3600000) requestCache.delete(key)
-    })
-  }
-}
-
-async function retryWithBackoff<T>(
-  operation: () => Promise<T>,
-  retries: number = 3,
-  baseDelay: number = 1000
-): Promise<T> {
-  try {
-    return await operation()
-  } catch (error: any) {
-    const errorMessage = error.message || String(error)
-    if (retries === 0 || (!errorMessage.includes("429") && !errorMessage.includes("50") && !errorMessage.includes("503"))) {
-      throw error
-    }
-    const delay = baseDelay * Math.pow(2, 3 - retries) * (0.5 + Math.random())
-    console.log(`API Request failed. Retrying in ${Math.round(delay)}ms...`)
-    await new Promise(resolve => setTimeout(resolve, delay))
-    return retryWithBackoff(operation, retries - 1, baseDelay)
-  }
-}
 
 function performStaticAnalysis(code: string, language: string): CodeAnalysisResult {
   const lines = code.split("\n")
@@ -197,71 +181,61 @@ function performStaticAnalysis(code: string, language: string): CodeAnalysisResu
     codeSnippets: [{
       original: code.substring(0, 100) + "...",
       improved: "// Example improvement\n" + code.substring(0, 100) + "...",
-      explanation: "Static analysis mode. Connect to API for advanced suggestions."
+      explanation: "Static analysis mode. Connect API for advanced suggestions."
     }]
   }
 }
 
 export async function analyzeCode(code: string, language: string): Promise<CodeAnalysisResult> {
-  const cacheKey = `code:${code.substring(0, 100)}:${language}`
-
   try {
     const parsedInput = codeAnalysisSchema.safeParse({ code, language })
     if (!parsedInput.success) {
       return performStaticAnalysis(code, language)
     }
 
-    if (!genAI) {
+    if (!GROQ_API_KEY) {
       return performStaticAnalysis(code, language)
     }
 
-    const cached = getRateLimitedCachedResult(cacheKey)
-    if (cached) return cached as CodeAnalysisResult
+    const prompt = `Analyze the following ${language} code as a senior engineering professional:
 
-    const prompt = `
-      Analyze the following ${language} code as a senior engineering professional:
-      
-      \`\`\`${language}
-      ${code}
-      \`\`\`
-      
-      Provide analysis with:
-      1. Technical summary
-      2. Time and space complexity (Big O)
-      3. Optimization recommendations
-      4. Best practices
-      5. Potential bugs and issues
-      6. Security vulnerabilities
-      7. Scores (1-10): readability, performance, maintainability, security
-      8. Overall quality score (1-10)
-      9. 1-3 code snippets showing improvements
-      
-      Format as JSON:
-      {
-        "summary": "...",
-        "complexity": { "time": "...", "space": "..." },
-        "suggestions": ["..."],
-        "bestPractices": ["..."],
-        "potentialIssues": ["..."],
-        "securityConcerns": ["..."],
-        "readabilityScore": 7,
-        "performanceScore": 6,
-        "maintainabilityScore": 8,
-        "securityScore": 5,
-        "overallScore": 6.5,
-        "codeSnippets": [{ "original": "...", "improved": "...", "explanation": "..." }]
-      }
-    `
+\`\`\`${language}
+${code}
+\`\`\`
 
-    const callApi = async () => {
-      const model = genAI.getGenerativeModel({ model: MODEL_NAME })
-      const result = await model.generateContent(prompt)
-      return result.response.text()
-    }
+Provide analysis with:
+1. Technical summary
+2. Time and space complexity (Big O)
+3. Optimization recommendations
+4. Best practices
+5. Potential bugs and issues
+6. Security vulnerabilities
+7. Scores (1-10): readability, performance, maintainability, security
+8. Overall quality score (1-10)
+9. 1-3 code snippets showing improvements
 
-    const text = await retryWithBackoff(callApi)
+Format as JSON:
+{
+  "summary": "...",
+  "complexity": { "time": "...", "space": "..." },
+  "suggestions": ["..."],
+  "bestPractices": ["..."],
+  "potentialIssues": ["..."],
+  "securityConcerns": ["..."],
+  "readabilityScore": 7,
+  "performanceScore": 6,
+  "maintainabilityScore": 8,
+  "securityScore": 5,
+  "overallScore": 6.5,
+  "codeSnippets": [{ "original": "...", "improved": "...", "explanation": "..." }]
+}`
+
+    const text = await callGroqAPI([
+      { role: "system", content: "You are an expert code analyst. Respond with valid JSON only." },
+      { role: "user", content: prompt }
+    ])
+
     const analysisResult = extractJsonFromResponse(text) as CodeAnalysisResult
-    setCachedResult(cacheKey, analysisResult)
     return analysisResult
 
   } catch (error: any) {
@@ -281,40 +255,31 @@ export async function getAlgorithmExplanation(algorithm: string): Promise<Algori
       return algorithmFallback(algorithm)
     }
 
-    if (!genAI) {
+    if (!GROQ_API_KEY) {
       return algorithmFallback(algorithm)
     }
 
-    const cacheKey = `algorithm:${algorithm.toLowerCase()}`
-    const cached = getRateLimitedCachedResult(cacheKey)
-    if (cached) return cached as AlgorithmExplanationResult
+    const prompt = `Explain the ${algorithm} algorithm technically.
 
-    const prompt = `
-      Explain the ${algorithm} algorithm technically.
-      
-      Format as JSON:
-      {
-        "name": "Full name",
-        "description": "How it works",
-        "timeComplexity": { "best": "...", "average": "...", "worst": "..." },
-        "spaceComplexity": "...",
-        "pseudocode": "...",
-        "advantages": ["..."],
-        "disadvantages": ["..."],
-        "useCases": ["..."],
-        "visualizationSteps": ["..."]
-      }
-    `
+Format as JSON:
+{
+  "name": "Full name",
+  "description": "How it works",
+  "timeComplexity": { "best": "...", "average": "...", "worst": "..." },
+  "spaceComplexity": "...",
+  "pseudocode": "...",
+  "advantages": ["..."],
+  "disadvantages": ["..."],
+  "useCases": ["..."],
+  "visualizationSteps": ["..."]
+}`
 
-    const callApi = async () => {
-      const model = genAI.getGenerativeModel({ model: MODEL_NAME })
-      const result = await model.generateContent(prompt)
-      return result.response.text()
-    }
+    const text = await callGroqAPI([
+      { role: "system", content: "You are an expert algorithm tutor. Respond with valid JSON only." },
+      { role: "user", content: prompt }
+    ])
 
-    const text = await retryWithBackoff(callApi)
     const explanationResult = extractJsonFromResponse(text) as AlgorithmExplanationResult
-    setCachedResult(cacheKey, explanationResult)
     return explanationResult
 
   } catch (error) {

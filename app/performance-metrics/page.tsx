@@ -202,10 +202,10 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
         efficiency = 95 + Math.sin(seed) * 5
         break
       case "quick":
-        time = size * Math.log2(size) * 0.05 + Math.sin(seed) * 3
-        memory = size * 0.8 + Math.log2(size) * 2 + Math.cos(seed) * 3
-        operations = size * Math.log2(size) * 0.8 + Math.sin(seed) * size
-        efficiency = 75 + Math.sin(seed) * 10
+        time = size * Math.log2(size) * 0.1 * randomVariation
+        memory = size * 0.8 * randomVariation
+        operations = size * Math.log2(size) * 0.8 * randomVariation
+        efficiency = 75 + (randomVariation * 10)
         break
       case "merge":
         time = size * Math.log2(size) * 0.06 + Math.sin(seed) * 4
@@ -250,10 +250,10 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
         efficiency = 88 + Math.sin(seed) * 4
         break
       case "floyd":
-        time = size * size * size * 0.001 + Math.sin(seed) * 5
-        memory = size * size * 0.01 + Math.cos(seed) * 5
-        operations = size * size * size * 0.002 + Math.sin(seed) * size
-        efficiency = 70 + Math.sin(seed) * 10
+        time = size * size * size * 0.00005 * randomVariation
+        memory = size * size * 0.01 * randomVariation
+        operations = size * size * size * 0.0001 * randomVariation
+        efficiency = 70 + (randomVariation * 5)
         break
       case "kmp":
         time = size * 0.03 + Math.sin(seed) * 1
@@ -286,10 +286,10 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
         efficiency = 94 + Math.sin(seed) * 2
         break
       case "recursive":
-        time = size * Math.log2(size) * 0.05 + Math.sin(seed) * 2
-        memory = size * 0.8 + Math.cos(seed) * 3
-        operations = size * Math.log2(size) * 0.4 + Math.sin(seed) * size
-        efficiency = 85 + Math.sin(seed) * 5
+        time = size * Math.log2(size) * 0.08 * randomVariation
+        memory = size * 0.8 * randomVariation
+        operations = size * Math.log2(size) * 0.4 * randomVariation
+        efficiency = 85 + (randomVariation * 5)
         break
       default:
         time = size * Math.log2(size) * 0.05

@@ -134,12 +134,34 @@ export default function AlgorithmVisualizer({
     setSpeed(value[0])
   }
 
-  // Calculate bar dimensions
-  const barWidth = Math.floor((width - 100) / barData.length)
+  // Ref for the container to measure its width
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(width)
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.width > 0) {
+          setContainerWidth(entry.contentRect.width)
+        }
+      }
+    })
+
+    resizeObserver.observe(containerRef.current)
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [])
+
+  // Calculate bar dimensions based on container width instead of fixed width
+  const barWidth = Math.max(2, Math.floor((containerWidth - 40) / barData.length)) // Min 2px
   const maxValue = Math.max(...data)
   const scale = (height - 80) / maxValue
 
-  // Get color based on state and color mode
+  // ... rest of getBarColor ...
   const getBarColor = (bar: BarData, index: number) => {
     if (colorMode === "rainbow" && bar.state === "default") {
       // Rainbow gradient for default state in rainbow mode
@@ -171,9 +193,13 @@ export default function AlgorithmVisualizer({
 
   return (
     <Card className="border border-border/40 shadow-lg overflow-hidden glass-effect">
-      <CardContent className="p-6">
+      <CardContent className="p-4 md:p-6">
         <div className="flex flex-col items-center space-y-6">
-          <div className="relative bg-secondary/30 rounded-md" style={{ width: `${width}px`, height: `${height}px` }}>
+          <div
+            ref={containerRef}
+            className="relative bg-secondary/30 rounded-md w-full overflow-hidden"
+            style={{ height: `${height}px` }}
+          >
             <div className="absolute inset-0 flex items-end justify-center">
               <AnimatePresence initial={false}>
                 {barData.map((bar, index) => {
@@ -280,36 +306,39 @@ export default function AlgorithmVisualizer({
                 </Button>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground">Speed:</span>
-                <Slider value={[speed]} min={1} max={100} step={1} onValueChange={handleSpeedChange} className="w-32" />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-primary mr-1"></div>
-                  <span>Default</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
-                  <span>Comparing</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
-                  <span>Sorted</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
-                  <span>Pivot</span>
+              <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-col sm:flex-row items-center w-full gap-4 sm:gap-0 sm:justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-muted-foreground w-12">Speed:</span>
+                    <Slider value={[speed]} min={1} max={100} step={1} onValueChange={handleSpeedChange} className="w-32 md:w-48" />
+                  </div>
                 </div>
               </div>
 
-              <div>Progress: {Math.round((currentStep / (totalSteps - 1)) * 100) || 0}%</div>
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-primary mr-1"></div>
+                    <span>Default</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
+                    <span>Comparing</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+                    <span>Sorted</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
+                    <span>Pivot</span>
+                  </div>
+                </div>
+
+                <div>Progress: {Math.round((currentStep / (totalSteps - 1)) * 100) || 0}%</div>
+              </div>
             </div>
           </div>
-        </div>
       </CardContent>
     </Card>
   )

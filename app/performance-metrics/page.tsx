@@ -192,8 +192,8 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
     let memory = 0
     let operations = 0
     let efficiency = 0
-    const seed = dataSeed * size
-    const randomVariation = Math.random() * 0.1 + 0.95 // 0.95 to 1.05 multiplier
+    // Use a local seed so it's deterministic per size but varies slightly
+    const randomVariation = Math.random() * 0.1 + 0.95
 
     switch (algorithm) {
       case "bubble":
@@ -218,7 +218,7 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
         time = size * size * 0.004 * randomVariation
         memory = 0.12 * randomVariation
         operations = size * size * 0.4 * randomVariation
-        efficiency = 80 + (randomVariation * 5)
+        efficiency = 70 + (randomVariation * 5)
         break
       case "selection":
         time = size * size * 0.0045 * randomVariation
@@ -301,8 +301,8 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
 
     return {
       size,
-      time: Math.max(0.1, time.toFixed(2)),
-      memory: Math.max(0.1, memory.toFixed(2)),
+      time: Math.max(0.1, Number(time.toFixed(2))),
+      memory: Math.max(0.1, Number(memory.toFixed(2))),
       operations: Math.max(1, Math.floor(operations)),
       efficiency: Math.min(100, Math.max(0, Math.floor(efficiency))),
     }
@@ -313,7 +313,7 @@ const generateComparisonData = (maxSize, dataSeed = Math.random()) => {
   const sizes = [10, 50, 100, 200, 500, maxSize].filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b)
   return sizes.map((size) => {
     const randomVariation = Math.random() * 0.2 + 0.9 // 0.9 to 1.1 multiplier
-    const data = { size }
+    const data: any = { size }
     algorithmOptions.forEach((algo) => {
       let time = 0
       switch (algo.id) {

@@ -749,7 +749,7 @@ export default function PerformanceMetricsPage() {
 
       <Tabs defaultValue="time" className="w-full">
         <div
-          className="sticky top-0 z-10 bg-background py-4 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 transform translate-y-4 opacity-0 animate-slide-in"
+          className="bg-card border rounded-lg py-4 px-4 sm:px-6 lg:px-8 mb-6 shadow-sm"
           style={{ animationDelay: '0.6s' }}
         >
           <TabsList className="flex flex-wrap justify-center gap-2 sm:grid sm:grid-cols-5 w-full max-w-full sm:max-w-4xl mx-auto">
@@ -815,7 +815,7 @@ export default function PerformanceMetricsPage() {
                   Time complexity of {selectedAlgorithm?.name || 'selected algorithm'}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="overflow-hidden" style={{ height: chartHeight }}>
+              <CardContent style={{ height: chartHeight }}>
                 {isLoading ? (
                   <div className="flex items-center justify-center h-full">
                     <Loader2 className="h-8 w-8 animate-spin" />

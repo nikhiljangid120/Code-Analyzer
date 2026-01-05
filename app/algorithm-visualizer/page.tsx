@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
- 
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import AlgorithmVisualizer from "@/components/algorithm-visualizer"
 import DataStructureVisualizer from "@/components/data-structure-visualizer"
-import { getAlgorithmExplanation, type AlgorithmExplanationResult } from "@/lib/gemini-service"
+import { getHardcodedAlgorithmExplanation, type AlgorithmExplanation } from "@/lib/algorithm-data"
 import { RefreshCw, Play, Sparkles, Loader2, Info, BarChart2, Database, Box } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { motion } from "framer-motion"
@@ -56,7 +56,7 @@ export default function AlgorithmVisualizerPage() {
   const [customInput, setCustomInput] = useState("")
   const [colorMode, setColorMode] = useState<"default" | "rainbow" | "heat">("default")
   const [showExplanation, setShowExplanation] = useState(false)
-  const [algorithmExplanation, setAlgorithmExplanation] = useState<AlgorithmExplanationResult | null>(null)
+  const [algorithmExplanation, setAlgorithmExplanation] = useState<AlgorithmExplanation | null>(null)
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false)
   const [is3D, setIs3D] = useState(false)
   const [sortingIn3D, setSortingIn3D] = useState(false)
@@ -126,26 +126,16 @@ export default function AlgorithmVisualizerPage() {
     setColorMode(value as "default" | "rainbow" | "heat")
   }
 
-  const handleToggleExplanation = async () => {
+  const handleToggleExplanation = () => {
     setShowExplanation(!showExplanation)
 
-    if (!algorithmExplanation && !isLoadingExplanation) {
-      setIsLoadingExplanation(true)
-      try {
-        const selectedAlgorithm = sortingAlgorithmOptions.find((opt) => opt.id === algorithm)
-        if (selectedAlgorithm) {
-          const explanation = await getAlgorithmExplanation(selectedAlgorithm.name)
+    if (!algorithmExplanation) {
+      const selectedAlgorithm = sortingAlgorithmOptions.find((opt) => opt.id === algorithm)
+      if (selectedAlgorithm) {
+        const explanation = getHardcodedAlgorithmExplanation(selectedAlgorithm.name)
+        if (explanation) {
           setAlgorithmExplanation(explanation)
         }
-      } catch (error) {
-        console.error("Error fetching algorithm explanation:", error)
-        toast({
-          title: "Failed to load explanation",
-          description: "There was an error loading the algorithm explanation",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoadingExplanation(false)
       }
     }
   }
@@ -488,10 +478,10 @@ export default function AlgorithmVisualizerPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <DataStructureVisualizer 
-              dataStructure={dataStructure} 
+            <DataStructureVisualizer
+              dataStructure={dataStructure}
               data={data}
-              is3D={is3D} 
+              is3D={is3D}
               colorMode={colorMode}
               height={visualizerHeight}
             />

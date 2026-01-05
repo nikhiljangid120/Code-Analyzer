@@ -841,7 +841,7 @@ export default function PerformanceMetricsPage() {
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12 }} />
+                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12, color: 'var(--foreground)' }} />
                           <Area type="monotone" dataKey="time" stroke="var(--color-time)" fill="var(--color-time)" fillOpacity={0.3} name="Execution Time (ms)" isAnimationActive={animateCharts} />
                           {showTheoretical && (
                             <>
@@ -860,7 +860,7 @@ export default function PerformanceMetricsPage() {
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12 }} />
+                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12, color: 'var(--foreground)' }} />
                           <Line type="monotone" dataKey="time" stroke="var(--color-time)" name="Execution Time (ms)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} isAnimationActive={animateCharts} />
                           {showTheoretical && (
                             <>
@@ -879,7 +879,7 @@ export default function PerformanceMetricsPage() {
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12 }} />
+                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12, color: 'var(--foreground)' }} />
                           <Bar dataKey="time" fill="var(--color-time)" name="Execution Time (ms)" isAnimationActive={animateCharts} />
                           {showTheoretical && (
                             <>
@@ -943,7 +943,7 @@ export default function PerformanceMetricsPage() {
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Memory (MB)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12 }} />
+                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12, color: 'var(--foreground)' }} />
                           <Area type="monotone" dataKey="memory" stroke="var(--color-memory)" fill="var(--color-memory)" fillOpacity={0.3} name="Memory Usage (MB)" isAnimationActive={animateCharts} />
                         </AreaChart>
                       ) : chartType === "line" ? (
@@ -952,7 +952,7 @@ export default function PerformanceMetricsPage() {
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Memory (MB)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12 }} />
+                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12, color: 'var(--foreground)' }} />
                           <Line type="monotone" dataKey="memory" stroke="var(--color-memory)" name="Memory Usage (MB)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} isAnimationActive={animateCharts} />
                         </LineChart>
                       ) : (
@@ -961,7 +961,7 @@ export default function PerformanceMetricsPage() {
                           <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                           <YAxis label={{ value: "Memory (MB)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12 }} />
+                          <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12, color: 'var(--foreground)' }} />
                           <Bar dataKey="memory" fill="var(--color-memory)" name="Memory Usage (MB)" isAnimationActive={animateCharts} />
                         </BarChart>
                       )}
@@ -1015,7 +1015,7 @@ export default function PerformanceMetricsPage() {
                         <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -20 }} tick={{ fontSize: 12 }} />
                         <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend verticalAlign="top" height={80} wrapperStyle={{ fontSize: 12, overflow: 'auto', maxHeight: '80px', paddingBottom: '20px' }} />
+                        <Legend verticalAlign="top" height={80} wrapperStyle={{ fontSize: 12, overflow: 'auto', maxHeight: '80px', paddingBottom: '20px', color: 'var(--foreground)' }} />
                         {filteredAlgorithms.map((opt) => (
                           <Line key={opt.id} type="monotone" dataKey={opt.id} stroke={`var(--color-${opt.id})`} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} name={opt.name} isAnimationActive={animateCharts} />
                         ))}
@@ -1056,7 +1056,7 @@ export default function PerformanceMetricsPage() {
                         <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                         <YAxis label={{ value: "Count", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12 }} />
+                        <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12, color: 'var(--foreground)' }} />
                         <Line type="monotone" dataKey="operations" stroke="var(--color-operations)" name="Operations" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} isAnimationActive={animateCharts} />
                       </LineChart>
                     </ResponsiveContainer>
@@ -1097,7 +1097,7 @@ export default function PerformanceMetricsPage() {
                         ))}
                       </Pie>
                       <Tooltip content={<CustomTooltip />} />
-                      <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: 12, overflow: 'auto', maxHeight: '36px' }} />
+                      <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: 12, overflow: 'auto', maxHeight: '36px', color: 'var(--foreground)' }} />
                     </PieChart>
                   </ResponsiveContainer>
                 )}
@@ -1130,11 +1130,11 @@ export default function PerformanceMetricsPage() {
                       <YAxis type="number" dataKey="efficiency" name="Efficiency" label={{ value: "Efficiency Score", angle: -90, position: "insideLeft", offset: 10, fontSize: 12 }} tick={{ fontSize: 12 }} />
                       <ZAxis type="number" dataKey="time" range={[50, 400]} name="Time (ms)" />
                       <Tooltip content={<CustomTooltip />} />
-                      <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12 }} />
+                      <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12, color: 'var(--foreground)' }} />
                       <Scatter
                         name={selectedAlgorithm?.name || 'Selected Algorithm'}
                         data={performanceData}
-                        fill={selectedAlgorithm?.color.replace("var(--", "").replace(")", "") || '#8884d8'}
+                        fill={selectedAlgorithm?.color || '#8884d8'}
                         isAnimationActive={animateCharts}
                       />
                     </ScatterChart>

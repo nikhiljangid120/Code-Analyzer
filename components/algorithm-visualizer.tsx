@@ -305,42 +305,43 @@ export default function AlgorithmVisualizer({
                   <SkipForward className="h-4 w-4" />
                 </Button>
               </div>
+            </div>
 
-              <div className="flex items-center justify-between mt-4">
-                <div className="flex flex-col sm:flex-row items-center w-full gap-4 sm:gap-0 sm:justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-muted-foreground w-12">Speed:</span>
-                    <Slider value={[speed]} min={1} max={100} step={1} onValueChange={handleSpeedChange} className="w-32 md:w-48" />
-                  </div>
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex flex-col sm:flex-row items-center w-full gap-4 sm:gap-0 sm:justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-muted-foreground w-12">Speed:</span>
+                  <Slider value={[speed]} min={1} max={100} step={1} onValueChange={handleSpeedChange} className="w-32 md:w-48" />
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <div className="flex items-center space-x-4 flex-wrap gap-y-2">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-primary mr-1"></div>
-                    <span>Default</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
-                    <span>Comparing</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
-                    <span>Sorted</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
-                    <span>Pivot</span>
-                  </div>
-                </div>
-
-                <div>Progress: {Math.round((currentStep / (totalSteps - 1)) * 100) || 0}%</div>
               </div>
             </div>
+
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center space-x-4 flex-wrap gap-y-2">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-primary mr-1"></div>
+                  <span>Default</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
+                  <span>Comparing</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+                  <span>Sorted</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
+                  <span>Pivot</span>
+                </div>
+              </div>
+
+              <div>Progress: {Math.round((currentStep / (totalSteps - 1)) * 100) || 0}%</div>
+            </div>
           </div>
+        </div>
       </CardContent>
-    </Card>
+    </Card >
   )
 }
 

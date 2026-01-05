@@ -474,11 +474,11 @@ export default function PerformanceMetricsPage() {
     const handleResize = () => {
       const width = window.innerWidth
       if (width < 640) {
-        setChartHeight(250)
+        setChartHeight(350)
       } else if (width < 1024) {
-        setChartHeight(300)
+        setChartHeight(400)
       } else {
-        setChartHeight(isFullscreen ? 500 : 400)
+        setChartHeight(isFullscreen ? 600 : 500)
       }
     }
     handleResize()

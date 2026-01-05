@@ -1738,7 +1738,7 @@ export default function DataStructureVisualizer({
     })
     return edges
   }
-  
+
   const renderHeapNodes = (nodes: HeapNode[]) => {
     const elements: JSX.Element[] = []
     nodes.forEach((node, index) => {

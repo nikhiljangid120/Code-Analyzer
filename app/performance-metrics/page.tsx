@@ -196,10 +196,10 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
 
     switch (algorithm) {
       case "bubble":
-        time = size * size * 0.01 + Math.sin(seed) * 5
-        memory = size * 0.5 + Math.cos(seed) * 2
-        operations = size * size * 0.9 + Math.sin(seed) * size
-        efficiency = 95 + Math.sin(seed) * 5
+        time = size * size * 0.005 * randomVariation
+        memory = 0.1 * randomVariation
+        operations = size * size * 0.5 * randomVariation
+        efficiency = 60 + (randomVariation * 5)
         break
       case "quick":
         time = size * Math.log2(size) * 0.1 * randomVariation
@@ -208,46 +208,46 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
         efficiency = 75 + (randomVariation * 10)
         break
       case "merge":
-        time = size * Math.log2(size) * 0.06 + Math.sin(seed) * 4
-        memory = size * 1.2 + Math.cos(seed) * 5
-        operations = size * Math.log2(size) * 0.7 + Math.sin(seed) * size
-        efficiency = 98 + Math.sin(seed) * 2
+        time = size * Math.log2(size) * 0.12 * randomVariation
+        memory = size * 1.5 * randomVariation
+        operations = size * Math.log2(size) * 0.9 * randomVariation
+        efficiency = 90 + (randomVariation * 5)
         break
       case "insertion":
-        time = size * size * 0.008 + Math.sin(seed) * 2
-        memory = size * 0.4 + Math.cos(seed) * 1
-        operations = size * size * 0.4 + Math.sin(seed) * size
-        efficiency = 97 + Math.sin(seed) * 3
+        time = size * size * 0.004 * randomVariation
+        memory = 0.12 * randomVariation
+        operations = size * size * 0.4 * randomVariation
+        efficiency = 80 + (randomVariation * 5)
         break
       case "selection":
-        time = size * size * 0.009 + Math.sin(seed) * 3
-        memory = size * 0.3 + Math.cos(seed) * 1
-        operations = size * size * 0.5 + Math.sin(seed) * size
-        efficiency = 80 + Math.sin(seed) * 8
+        time = size * size * 0.0045 * randomVariation
+        memory = 0.1 * randomVariation
+        operations = size * size * 0.45 * randomVariation
+        efficiency = 70 + (randomVariation * 5)
         break
       case "binary":
-        time = Math.log2(size) * 0.02 + Math.sin(seed) * 1
-        memory = 0.1 + Math.cos(seed) * 0.5
-        operations = Math.log2(size) + Math.sin(seed) * 2
-        efficiency = 99 + Math.sin(seed) * 1
+        time = Math.log2(size) * 0.2 * randomVariation
+        memory = 0.1 * randomVariation
+        operations = Math.log2(size) * randomVariation
+        efficiency = 99
         break
       case "bfs":
-        time = size * 0.05 + Math.sin(seed) * 2
-        memory = size * 0.7 + Math.cos(seed) * 3
-        operations = size * 1.2 + Math.sin(seed) * size * 0.1
-        efficiency = 85 + Math.sin(seed) * 5
+        time = size * 0.1 * randomVariation
+        memory = size * 0.9 * randomVariation
+        operations = size * 1.5 * randomVariation
+        efficiency = 85 + (randomVariation * 5)
         break
       case "dfs":
-        time = size * 0.06 + Math.sin(seed) * 2
-        memory = size * 0.6 + Math.cos(seed) * 3
-        operations = size * 1.1 + Math.sin(seed) * size * 0.1
-        efficiency = 84 + Math.sin(seed) * 5
+        time = size * 0.12 * randomVariation
+        memory = size * 0.8 * randomVariation
+        operations = size * 1.4 * randomVariation
+        efficiency = 84 + (randomVariation * 5)
         break
       case "dijkstra":
-        time = (size + size * Math.log2(size)) * 0.04 + Math.sin(seed) * 3
-        memory = size * 0.9 + Math.cos(seed) * 4
-        operations = size * Math.log2(size) * 0.5 + Math.sin(seed) * size
-        efficiency = 88 + Math.sin(seed) * 4
+        time = (size + size * Math.log2(size)) * 0.08 * randomVariation
+        memory = size * 1.2 * randomVariation
+        operations = size * Math.log2(size) * 1.2 * randomVariation
+        efficiency = 88 + (randomVariation * 4)
         break
       case "floyd":
         time = size * size * size * 0.00005 * randomVariation
@@ -256,34 +256,34 @@ const generatePerformanceData = (algorithm, maxSize, dataSeed = Math.random()) =
         efficiency = 70 + (randomVariation * 5)
         break
       case "kmp":
-        time = size * 0.03 + Math.sin(seed) * 1
-        memory = size * 0.2 + Math.cos(seed) * 1
-        operations = size * 0.5 + Math.sin(seed) * size * 0.05
-        efficiency = 90 + Math.sin(seed) * 3
+        time = size * 0.03 * randomVariation
+        memory = size * 0.4 * randomVariation
+        operations = size * 0.6 * randomVariation
+        efficiency = 95 + (randomVariation * 3)
         break
       case "boyer":
-        time = size * 0.025 + Math.sin(seed) * 1
-        memory = size * 0.25 + Math.cos(seed) * 1
-        operations = size * 0.4 + Math.sin(seed) * size * 0.05
-        efficiency = 92 + Math.sin(seed) * 3
+        time = size * 0.02 * randomVariation
+        memory = size * 0.3 * randomVariation
+        operations = size * 0.4 * randomVariation
+        efficiency = 96 + (randomVariation * 3)
         break
       case "greedy":
-        time = size * 0.04 + Math.sin(seed) * 2
-        memory = size * 0.5 + Math.cos(seed) * 2
-        operations = size * 0.6 + Math.sin(seed) * size * 0.1
-        efficiency = 80 + Math.sin(seed) * 10
+        time = size * 0.08 * randomVariation
+        memory = size * 0.6 * randomVariation
+        operations = size * 0.9 * randomVariation
+        efficiency = 80 + (randomVariation * 5)
         break
       case "kadane":
-        time = size * 0.01 + Math.sin(seed) * 1
-        memory = 0.1 + Math.cos(seed) * 0.5
-        operations = size * 0.3 + Math.sin(seed) * size * 0.05
-        efficiency = 95 + Math.sin(seed) * 2
+        time = size * 0.02 * randomVariation
+        memory = 0.1 * randomVariation
+        operations = size * 0.3 * randomVariation
+        efficiency = 98 + (randomVariation * 2)
         break
       case "slowfast":
-        time = size * 0.015 + Math.sin(seed) * 1
-        memory = 0.1 + Math.cos(seed) * 0.5
-        operations = size * 0.2 + Math.sin(seed) * size * 0.05
-        efficiency = 94 + Math.sin(seed) * 2
+        time = size * 0.03 * randomVariation
+        memory = 0.1 * randomVariation
+        operations = size * 0.3 * randomVariation
+        efficiency = 97 + (randomVariation * 2)
         break
       case "recursive":
         time = size * Math.log2(size) * 0.08 * randomVariation

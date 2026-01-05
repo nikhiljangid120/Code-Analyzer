@@ -1549,7 +1549,7 @@ export default function DataStructureVisualizer({
   }
 
   const render3DGraphEdges = () => {
-    const edges: JSX.Element[] = []
+    const edges: React.JSX.Element[] = []
     graphData.forEach((node) => {
       node.edges.forEach((targetId) => {
         const targetNode = graphData.find((n) => n.id === targetId)
@@ -1574,11 +1574,11 @@ export default function DataStructureVisualizer({
     x: number,
     y: number,
     width: number,
-  ): JSX.Element[] => {
+  ): React.JSX.Element[] => {
     if (!nodeId) return []
     const node = nodes.find((n) => n.id === nodeId)
     if (!node) return []
-    const elements: JSX.Element[] = []
+    const elements: React.JSX.Element[] = []
     const nodeRadius = canvasSize.width < 640 ? 20 : 25
     elements.push(
       <motion.g

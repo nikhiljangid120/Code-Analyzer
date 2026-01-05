@@ -107,7 +107,7 @@ export default function CodeAnalyzerPage() {
         transition={{ duration: 0.5 }}
         className="flex flex-col space-y-2"
       >
-        <h1 className="text-4xl font-bold tracking-tight font-heading">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-heading">
           <span className="text-primary glow-text">AI-Powered</span> Code Analyzer
         </h1>
         <p className="text-muted-foreground text-lg">
@@ -238,7 +238,7 @@ export default function CodeAnalyzerPage() {
 
                   <div className="px-6 pt-2 pb-0">
                     <Tabs defaultValue="summary" className="w-full">
-                      <TabsList className="grid grid-cols-4 w-full">
+                      <TabsList className="grid grid-cols-4 w-full h-auto overflow-x-auto">
                         <TabsTrigger value="summary">Summary</TabsTrigger>
                         <TabsTrigger value="issues">Issues</TabsTrigger>
                         <TabsTrigger value="improvements">Improvements</TabsTrigger>

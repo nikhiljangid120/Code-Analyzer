@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import AlgorithmVisualizer from "@/components/algorithm-visualizer"
-import DataStructureVisualizer from "@/components/data-structure-visualizer"
+import DataStructureVisualizer, { type DataStructure } from "@/components/data-structure-visualizer"
 import { getHardcodedAlgorithmExplanation, type AlgorithmExplanation } from "@/lib/algorithm-data"
 import { RefreshCw, Play, Sparkles, Loader2, Info, BarChart2, Database, Box } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
@@ -49,8 +49,8 @@ const colorModeOptions = [
 ]
 
 export default function AlgorithmVisualizerPage() {
-  const [algorithm, setAlgorithm] = useState("quick")
-  const [dataStructure, setDataStructure] = useState("array")
+  const [algorithm, setAlgorithm] = useState("bubble")
+  const [dataStructure, setDataStructure] = useState<DataStructure>("array")
   const [arraySize, setArraySize] = useState(30)
   const [data, setData] = useState<number[]>(() => generateRandomArray(30))
   const [customInput, setCustomInput] = useState("")

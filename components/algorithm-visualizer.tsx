@@ -14,6 +14,7 @@ interface VisualizerProps {
   width?: number
   height?: number
   colorMode?: "default" | "rainbow" | "heat"
+  is3D?: boolean
 }
 
 interface BarData {
@@ -28,6 +29,7 @@ export default function AlgorithmVisualizer({
   width = 800,
   height = 400,
   colorMode = "default",
+  is3D = false,
 }: VisualizerProps) {
   const [barData, setBarData] = useState<BarData[]>([])
   const [isPlaying, setIsPlaying] = useState(false)

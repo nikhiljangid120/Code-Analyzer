@@ -55,7 +55,7 @@ interface HashTableEntry {
   index: number
 }
 
-type DataStructure = "array" | "tree" | "linkedList" | "graph" | "stack" | "queue" | "heap" | "hashTable"
+export type DataStructure = "array" | "tree" | "linkedList" | "graph" | "stack" | "queue" | "heap" | "hashTable"
 
 interface DataStructureVisualizerProps {
   dataStructure: DataStructure
@@ -913,7 +913,7 @@ export default function DataStructureVisualizer({
         const randomHeap = Array.from({ length: 7 }, (_, i) => ({
           id: (i + 1).toString(),
           value: Math.floor(Math.random() * 100) + 1,
-          position: [0, 0, 0],
+          position: [0, 0, 0] as [number, number, number],
         }))
         updateHeapPositions(randomHeap)
         setHeapData(randomHeap)

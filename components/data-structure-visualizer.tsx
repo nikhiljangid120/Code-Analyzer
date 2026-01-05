@@ -1710,7 +1710,7 @@ export default function DataStructureVisualizer({
   }
 
   const renderGraphEdges = () => {
-    const edges: JSX.Element[] = []
+    const edges: React.JSX.Element[] = []
     graphData.forEach((node) => {
       node.edges.forEach((targetId) => {
         const targetNode = graphData.find((n) => n.id === targetId)
@@ -1740,7 +1740,7 @@ export default function DataStructureVisualizer({
   }
 
   const renderHeapNodes = (nodes: HeapNode[]) => {
-    const elements: JSX.Element[] = []
+    const elements: React.JSX.Element[] = []
     nodes.forEach((node, index) => {
       const x = (node.position?.[0] || 0) * 100 + 400
       const y = (node.position?.[1] || 0) * -80 + 300

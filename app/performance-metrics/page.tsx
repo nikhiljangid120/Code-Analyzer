@@ -995,7 +995,7 @@ export default function PerformanceMetricsPage() {
                 </CardTitle>
                 <CardDescription>Execution time comparison across algorithms</CardDescription>
               </CardHeader>
-              <CardContent className="overflow-hidden" style={{ height: chartHeight + 100 }}>
+              <CardContent style={{ height: chartHeight + 100 }}>
                 {isLoading ? (
                   <div className="flex items-center justify-center h-full">
                     <Loader2 className="h-8 w-8 animate-spin" />
@@ -1008,7 +1008,7 @@ export default function PerformanceMetricsPage() {
                     ]))}
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }} barGap={2} barCategoryGap="10%">
+                      <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }} barGap={2} barCategoryGap="10%">
                         <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
                         <XAxis dataKey="size" label={{ value: "Input Size", position: "insideBottomRight", offset: -10 }} tick={{ fontSize: 12 }} />
                         <YAxis label={{ value: "Time (ms)", angle: -90, position: "insideLeft", offset: 10 }} tick={{ fontSize: 12 }} />
@@ -1037,7 +1037,7 @@ export default function PerformanceMetricsPage() {
                   Number of operations performed by {selectedAlgorithm?.name || 'selected algorithm'}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="overflow-hidden" style={{ height: chartHeight }}>
+              <CardContent style={{ height: chartHeight }}>
                 {isLoading ? (
                   <div className="flex items-center justify-center h-full">
                     <Loader2 className="h-8 w-8 animate-spin" />

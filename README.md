@@ -38,5 +38,4 @@ A web-based tool that allows users to analyze code, visualize algorithm executio
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Environment Variables
-
 Create a `.env.local` file in the root directory:
